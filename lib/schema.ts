@@ -26,6 +26,7 @@ export const highlights = pgTable('highlights', {
   color: text('color').notNull(),
   serializedRange: text('serialized_range').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const bookmarks = pgTable('bookmarks', {
@@ -36,4 +37,5 @@ export const bookmarks = pgTable('bookmarks', {
   scrollPercentage: integer('scroll_percentage').notNull(),
   label: text('label'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
