@@ -5,10 +5,10 @@ A premium, offline-first PWA that turns your GitHub markdown files into a beauti
 ## User Review Required
 
 > [!IMPORTANT]
-> **GitHub OAuth App Setup**: You'll need to create a GitHub OAuth App in your GitHub Developer Settings. I'll generate the code, but you'll need to provide your `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` as environment variables. I'll include a setup guide.
+> **GitHub OAuth App Setup**: Clerk handles authentication with GitHub natively. You will configure the GitHub provider directly in your Clerk dashboard and get `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` for your app's environment variables.
 
 > [!IMPORTANT]
-> **Vercel Deployment**: The app will be configured for Vercel deployment. You'll need a Vercel account and to connect your repo. The OAuth callback URL will need to match your deployment domain.
+> **Vercel Deployment**: The app will be configured for Vercel deployment. You'll need a Vercel account and to connect your repo.
 
 > [!NOTE]
 > **Clerk & Neon DB Auto-Sync**: Per your request, the app will use Clerk for authentication (with GitHub OAuth) and Neon DB (Serverless Postgres) for database auto-sync. User data (reading progress, highlights, etc.) will be stored in Neon DB. 
@@ -147,7 +147,7 @@ Complete design system with CSS custom properties:
 
 ### 4. Offline Storage Layer (Dexie.js / IndexedDB)
 
-#### [NEW] `lib/db.ts`
+#### [NEW] `lib/offline-db.ts`
 Dexie database schema:
 
 ```typescript

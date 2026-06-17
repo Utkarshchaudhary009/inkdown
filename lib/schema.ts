@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, uuid, unique } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   clerkId: text('clerk_id').primaryKey(),
@@ -15,7 +15,9 @@ export const readingProgress = pgTable('reading_progress', {
   filePath: text('file_path').notNull(),
   scrollPercentage: integer('scroll_percentage').notNull().default(0),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (t) => [
+  unique('reading_progress_unique_idx').on(t.clerkId, t.repoFullName, t.filePath)
+]);
 
 export const highlights = pgTable('highlights', {
   id: uuid('id').primaryKey().defaultRandom(),
