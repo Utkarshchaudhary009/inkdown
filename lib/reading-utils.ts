@@ -1,8 +1,8 @@
-export function estimateReadingTime(text: string): number {
+export function calculateReadingTime(text: string): number {
   if (!text) return 0;
   const wordCount = text.trim().split(/\s+/).length;
   const wpm = 250;
-  return Math.ceil(wordCount / wpm);
+  return Math.max(1, Math.ceil(wordCount / wpm));
 }
 
 export function extractPlainText(markdown: string): string {
