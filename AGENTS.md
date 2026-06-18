@@ -103,10 +103,11 @@ All code changes follow this PR-based workflow:
 1. **Branch**: `git checkout -b feature/<short-description>` or `fix/<short-description>`
 2. **Commit**: Use clear, imperative commit messages: `Add TOC sidebar component`, `Fix highlight persistence on reload`
 3. **Push & PR**: `gh pr create --title "..." --body "..." --base main`
-4. **AI Review**: Wait for agent vulnerability/code-quality reviews in the PR comments
-5. **Fix**: Address all agent feedback before merging
-6. **Merge**: `gh pr merge --squash` (squash commits to keep `main` history clean)
-7. **Verify**: Check that the Vercel deployment build passes before calling the task done
+4. **AI Review Wait**: Wait for exactly **10 minutes** using the `schedule` tool to allow external AI agents to leave vulnerability/code-quality reviews in the PR comments.
+5. **Phase Research**: During this 10-minute wait, **always launch a research subagent** to fetch the official docs and find the best practices for the *next* upcoming phase.
+6. **Fix**: After the 10-minute wait expires, read the PR comments, launch a subagent to address all agent feedback, and verify the fixes.
+7. **Merge**: `gh pr merge --squash` (squash commits to keep `main` history clean)
+8. **Verify**: Check that the Vercel deployment build passes before calling the task done
 
 > **Never push directly to `main`.**
 

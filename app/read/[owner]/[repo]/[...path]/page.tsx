@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Settings } from "lucide-react";
 import { getFileContent } from "@/lib/github";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
-import { calculateReadingTime } from "@/lib/reading-utils";
+import { calculateReadingTime, extractPlainText } from "@/lib/reading-utils";
 
 interface ReaderPageProps {
   params: Promise<{
@@ -28,7 +28,7 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
     );
   }
 
-  const readingTime = calculateReadingTime(content);
+  const readingTime = calculateReadingTime(extractPlainText(content));
   const fileName = path[path.length - 1];
 
   return (
@@ -53,12 +53,7 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
             </span>
           </div>
 
-          <button 
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9"
-            aria-label="Settings"
-          >
-            <Settings className="h-5 w-5" />
-          </button>
+          <div className="w-9 h-9" aria-hidden="true" />
         </div>
       </header>
 

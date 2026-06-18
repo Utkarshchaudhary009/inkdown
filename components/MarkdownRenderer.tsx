@@ -11,9 +11,8 @@ import { cn } from "@/lib/utils";
 function extractText(node: React.ReactNode): string {
   if (typeof node === "string") return node;
   if (typeof node === "number") return String(node);
-  if (React.isValidElement(node)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return extractText((node.props as any).children);
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
+    return extractText(node.props.children);
   }
   if (Array.isArray(node)) {
     return node.map(extractText).join("");
@@ -27,11 +26,21 @@ function generateId(text: string): string {
 
 interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
   level: 1 | 2 | 3 | 4 | 5 | 6;
+  headingCounts: Record<string, number>;
 }
 
-const HeadingRenderer = ({ level, children, className, ...props }: HeadingProps) => {
+const HeadingRenderer = ({ level, children, className, headingCounts, ...props }: HeadingProps) => {
   const text = extractText(children);
-  const id = generateId(text);
+  const baseId = generateId(text);
+  
+  let id = baseId;
+  if (headingCounts[baseId]) {
+    const count = headingCounts[baseId];
+    headingCounts[baseId] = count + 1;
+    id = `${baseId}-${count}`;
+  } else {
+    headingCounts[baseId] = 1;
+  }
   const Tag = `h${level}` as ElementType;
   
   let sizeClass = "";
@@ -71,6 +80,10 @@ interface StreamdownComponentProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
+  const headingCounts = React.useRef<Record<string, number>>({});
+  // Reset counts on every render to ensure consistent IDs
+  headingCounts.current = {};
+
   return (
     <div className="markdown-body">
       <Streamdown
@@ -80,14 +93,13 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           mermaid,
         }}
         components={{
-          h1: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={1} {...props} />,
-          h2: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={2} {...props} />,
-          h3: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={3} {...props} />,
-          h4: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={4} {...props} />,
-          h5: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={5} {...props} />,
-          h6: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={6} {...props} />,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          img: ImageRenderer as any,
+          h1: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={1} headingCounts={headingCounts.current} {...props} />,
+          h2: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={2} headingCounts={headingCounts.current} {...props} />,
+          h3: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={3} headingCounts={headingCounts.current} {...props} />,
+          h4: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={4} headingCounts={headingCounts.current} {...props} />,
+          h5: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={5} headingCounts={headingCounts.current} {...props} />,
+          h6: ({ node: _, ...props }: StreamdownComponentProps) => <HeadingRenderer level={6} headingCounts={headingCounts.current} {...props} />,
+          img: ({ node: _, ...props }: StreamdownComponentProps & React.ImgHTMLAttributes<HTMLImageElement>) => <ImageRenderer {...props} />,
           p: ({ node: _, className, children, ...props }: StreamdownComponentProps) => (
             <p className={cn("leading-7 [&:not(:first-child)]:mt-6", className)} {...props}>{children}</p>
           ),
