@@ -1,21 +1,54 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@source "../node_modules/streamdown/dist/*.js";
+@source "../node_modules/@streamdown/code/dist/*.js";
+@source "../node_modules/@streamdown/math/dist/*.js";
+@source "../node_modules/@streamdown/mermaid/dist/*.js";
+
+:root,
+[data-theme="light"] {
+  --background: #fefefe;
+  --foreground: #1a1a2e;
+  --accent: #7c3aed;
+}
+
+[data-theme="dark"] {
+  --background: #0f0f13;
+  --foreground: #e4e4e7;
+  --accent: #a78bfa;
+}
+
+[data-theme="sepia"] {
+  --background: #f4ecd8;
+  --foreground: #5b4636;
+  --accent: #8b6914;
+}
+
+[data-theme="night"] {
+  --background: #0a0a0f;
+  --foreground: #c9a96e;
+  --accent: #d4a853;
+}
+
+[data-theme="forest"] {
+  --background: #0d1f0d;
+  --foreground: #b8d4b8;
+  --accent: #4ade80;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme]) {
+    --background: #0f0f13;
+    --foreground: #e4e4e7;
+    --accent: #a78bfa;
   }
 }
 
@@ -23,4 +56,5 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
