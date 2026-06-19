@@ -1,9 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { getFileContent } from "@/lib/github";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { calculateReadingTime, extractPlainText } from "@/lib/reading-utils";
+import { ReaderLayout } from "@/components/reader/ReaderLayout";
+import { SettingsPanel } from "@/components/reader/SettingsPanel";
 
 interface ReaderPageProps {
   params: Promise<{
@@ -16,6 +18,7 @@ interface ReaderPageProps {
 export default async function ReaderPage({ params }: ReaderPageProps) {
   const { owner, repo, path } = await params;
   const filePath = path.join("/");
+  const fileId = `${owner}/${repo}/${filePath}`;
   
   let content = "";
   try {
@@ -53,14 +56,15 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
             </span>
           </div>
 
-          <div className="w-9 h-9" aria-hidden="true" />
+          <SettingsPanel />
         </div>
       </header>
 
       {/* Reader Content */}
-      <main className="max-w-[720px] mx-auto px-4 py-8 sm:py-12 pb-24">
+      <ReaderLayout fileId={fileId}>
         <MarkdownRenderer content={content} />
-      </main>
+      </ReaderLayout>
     </div>
   );
 }
+
