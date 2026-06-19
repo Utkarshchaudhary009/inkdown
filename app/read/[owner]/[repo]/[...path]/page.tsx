@@ -23,7 +23,7 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
   let content = "";
   try {
     content = await getFileContent(owner, repo, filePath);
-  } catch (error) {
+  } catch {
     return (
       <div className="flex h-screen items-center justify-center">
         <p className="text-destructive">Failed to load file content. Make sure it exists and is a markdown file.</p>
