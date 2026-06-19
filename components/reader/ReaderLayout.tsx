@@ -22,7 +22,7 @@ export function ReaderLayout({ fileId, children }: ReaderLayoutProps) {
       <TOCSidebar contentRef={contentRef} />
       <HighlightManager fileId={fileId} containerRef={contentRef} />
       
-      <main ref={contentRef} className="max-w-[720px] mx-auto px-4 py-8 sm:py-12 pb-24 markdown-container" style={{ fontSize: 'calc(1rem * var(--font-size-multiplier, 1))', fontFamily: 'var(--font-family)' }}>
+      <main ref={contentRef} className="max-w-[720px] mx-auto px-4 py-8 sm:py-12 pb-24 markdown-container" style={{ fontFamily: 'var(--font-family)' }}>
         {children}
       </main>
     </>

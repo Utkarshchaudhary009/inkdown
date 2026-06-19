@@ -5,36 +5,24 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSettings } from '@/lib/db-hooks';
+import { useTheme, type Theme } from '@/components/ThemeProvider';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function SettingsPanel() {
+  const { theme, setTheme } = useTheme();
   const { settings, setSetting } = useSettings();
 
   const handleThemeChange = (value: string) => {
-    setSetting('theme', value);
-    // Since next-themes manages the theme, we also need to update its state or document class
-    // For now, let's assume we rely on next-themes and this just syncs to db
-    if (value === 'system') {
-      document.documentElement.classList.remove('dark');
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark');
-      }
-    } else if (value === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    setTheme(value as Theme);
   };
 
   const handleFontFamilyChange = (value: string) => {
     setSetting('fontFamily', value);
-    document.documentElement.style.setProperty('--font-family', value === 'serif' ? 'ui-serif, Georgia, serif' : 'ui-sans-serif, system-ui, sans-serif');
   };
 
   const handleFontSizeChange = (value: string) => {
     setSetting('fontSize', value);
-    document.documentElement.style.setProperty('--font-size-multiplier', value);
   };
 
   return (
@@ -53,13 +41,16 @@ export function SettingsPanel() {
           
           <div className="space-y-2">
             <Label>Theme</Label>
-            <Select value={(settings.theme as string) || 'system'} onValueChange={handleThemeChange}>
+            <Select value={theme} onValueChange={handleThemeChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a theme" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="light">Light</SelectItem>
                 <SelectItem value="dark">Dark</SelectItem>
+                <SelectItem value="sepia">Sepia</SelectItem>
+                <SelectItem value="night">Night</SelectItem>
+                <SelectItem value="forest">Forest</SelectItem>
                 <SelectItem value="system">System</SelectItem>
               </SelectContent>
             </Select>

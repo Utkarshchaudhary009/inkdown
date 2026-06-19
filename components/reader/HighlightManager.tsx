@@ -100,10 +100,10 @@ export function HighlightManager({ fileId, containerRef }: HighlightSelectionPro
     // Add CSS rules for highlight colors dynamically
     const style = document.createElement('style');
     style.textContent = `
-      ::highlight(highlight-yellow) { background-color: rgba(253, 224, 71, 0.4); }
-      ::highlight(highlight-green) { background-color: rgba(134, 239, 172, 0.4); }
-      ::highlight(highlight-blue) { background-color: rgba(147, 197, 253, 0.4); }
-      ::highlight(highlight-red) { background-color: rgba(252, 165, 165, 0.4); }
+      ::highlight(highlight-yellow) { background-color: var(--highlight-yellow); }
+      ::highlight(highlight-green) { background-color: var(--highlight-green); }
+      ::highlight(highlight-blue) { background-color: var(--highlight-blue); }
+      ::highlight(highlight-red) { background-color: var(--highlight-red); }
     `;
     document.head.appendChild(style);
     return () => { document.head.removeChild(style); };
