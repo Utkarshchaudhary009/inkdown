@@ -5,56 +5,249 @@
 @source "../node_modules/@streamdown/math/dist/*.js";
 @source "../node_modules/@streamdown/mermaid/dist/*.js";
 
+@variant dark (&:where(.dark, .dark *));
+
 :root,
 [data-theme="light"] {
   --background: #fefefe;
   --foreground: #1a1a2e;
+  --card: #fefefe;
+  --card-foreground: #1a1a2e;
+  --popover: #fefefe;
+  --popover-foreground: #1a1a2e;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
   --accent: #7c3aed;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #7c3aed;
+  --radius: 0.5rem;
+  
+  --highlight-yellow: rgba(253, 224, 71, 0.4);
+  --highlight-green: rgba(134, 239, 172, 0.4);
+  --highlight-blue: rgba(147, 197, 253, 0.4);
+  --highlight-red: rgba(252, 165, 165, 0.4);
 }
 
 [data-theme="dark"] {
   --background: #0f0f13;
   --foreground: #e4e4e7;
+  --card: #14141d;
+  --card-foreground: #e4e4e7;
+  --popover: #0f0f13;
+  --popover-foreground: #e4e4e7;
+  --primary: #a78bfa;
+  --primary-foreground: #0f0f13;
+  --secondary: #27272a;
+  --secondary-foreground: #f4f4f5;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
   --accent: #a78bfa;
+  --accent-foreground: #0f0f13;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #f8fafc;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #a78bfa;
+  
+  --highlight-yellow: rgba(253, 224, 71, 0.3);
+  --highlight-green: rgba(74, 222, 128, 0.3);
+  --highlight-blue: rgba(96, 165, 250, 0.3);
+  --highlight-red: rgba(248, 113, 113, 0.3);
 }
 
 [data-theme="sepia"] {
   --background: #f4ecd8;
   --foreground: #5b4636;
+  --card: #efe6d0;
+  --card-foreground: #5b4636;
+  --popover: #f4ecd8;
+  --popover-foreground: #5b4636;
+  --primary: #8b6914;
+  --primary-foreground: #fefefe;
+  --secondary: #e8dcbe;
+  --secondary-foreground: #5b4636;
+  --muted: #e8dcbe;
+  --muted-foreground: #8b7355;
   --accent: #8b6914;
+  --accent-foreground: #fefefe;
+  --destructive: #b22222;
+  --destructive-foreground: #fefefe;
+  --border: #dfd2b2;
+  --input: #dfd2b2;
+  --ring: #8b6914;
+  
+  --highlight-yellow: rgba(212, 163, 89, 0.4);
+  --highlight-green: rgba(143, 188, 143, 0.4);
+  --highlight-blue: rgba(176, 224, 230, 0.4);
+  --highlight-red: rgba(205, 92, 92, 0.4);
 }
 
 [data-theme="night"] {
   --background: #0a0a0f;
   --foreground: #c9a96e;
+  --card: #101017;
+  --card-foreground: #c9a96e;
+  --popover: #0a0a0f;
+  --popover-foreground: #c9a96e;
+  --primary: #d4a853;
+  --primary-foreground: #0a0a0f;
+  --secondary: #1a1a24;
+  --secondary-foreground: #c9a96e;
+  --muted: #1a1a24;
+  --muted-foreground: #9a8252;
   --accent: #d4a853;
+  --accent-foreground: #0a0a0f;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --border: #1c1c28;
+  --input: #1c1c28;
+  --ring: #d4a853;
+  
+  --highlight-yellow: rgba(212, 168, 83, 0.3);
+  --highlight-green: rgba(74, 222, 128, 0.25);
+  --highlight-blue: rgba(96, 165, 250, 0.25);
+  --highlight-red: rgba(248, 113, 113, 0.25);
 }
 
 [data-theme="forest"] {
   --background: #0d1f0d;
   --foreground: #b8d4b8;
+  --card: #132a13;
+  --card-foreground: #b8d4b8;
+  --popover: #0d1f0d;
+  --popover-foreground: #b8d4b8;
+  --primary: #4ade80;
+  --primary-foreground: #0d1f0d;
+  --secondary: #183518;
+  --secondary-foreground: #b8d4b8;
+  --muted: #183518;
+  --muted-foreground: #7f9e7f;
   --accent: #4ade80;
+  --accent-foreground: #0d1f0d;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --border: #1c3e1c;
+  --input: #1c3e1c;
+  --ring: #4ade80;
+  
+  --highlight-yellow: rgba(250, 204, 21, 0.3);
+  --highlight-green: rgba(74, 222, 128, 0.3);
+  --highlight-blue: rgba(96, 165, 250, 0.3);
+  --highlight-red: rgba(248, 113, 113, 0.3);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-md: var(--radius);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --background: #0f0f13;
-    --foreground: #e4e4e7;
-    --accent: #a78bfa;
-  }
+  --text-xs: clamp(0.75rem, 0.71rem + 0.18vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.83rem + 0.22vw, 1rem);
+  --text-base: clamp(1rem, 0.93rem + 0.36vw, 1.25rem);
+  --text-lg: clamp(1.125rem, 1.04rem + 0.45vw, 1.4375rem);
+  --text-xl: clamp(1.25rem, 1.14rem + 0.54vw, 1.625rem);
+  --text-2xl: clamp(1.5rem, 1.34rem + 0.8vw, 2rem);
+  --text-3xl: clamp(1.875rem, 1.65rem + 1.12vw, 2.5rem);
+  --text-4xl: clamp(2.25rem, 1.94rem + 1.56vw, 3.125rem);
+  --text-5xl: clamp(3rem, 2.5rem + 2.5vw, 4.25rem);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family, var(--font-geist-sans), Arial, Helvetica, sans-serif);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Proportional Reader Typography Scaling */
+.markdown-container {
+  font-size: calc(clamp(1rem, 0.886rem + 0.568vw, 1.25rem) * var(--font-size-multiplier, 1));
+}
+
+.markdown-container h1 {
+  font-size: 2.25em;
+  line-height: 1.2;
+}
+
+.markdown-container h2 {
+  font-size: 1.875em;
+  line-height: 1.3;
+}
+
+.markdown-container h3 {
+  font-size: 1.5em;
+  line-height: 1.4;
+}
+
+.markdown-container h4 {
+  font-size: 1.25em;
+  line-height: 1.4;
+}
+
+.markdown-container h5 {
+  font-size: 1.125em;
+  line-height: 1.5;
+}
+
+.markdown-container h6 {
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+.markdown-container p,
+.markdown-container li,
+.markdown-container blockquote {
+  font-size: 1em;
+  line-height: 1.75;
+}
+
+.markdown-container code {
+  font-size: 0.875em;
+}
+
+/* Override Clerk card backgrounds and text colors */
+.cl-card, .cl-userButtonPopoverCard {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.1)) !important;
+}
+.cl-headerTitle, .cl-headerSubtitle, .cl-formLabel, .cl-dividerText {
+  color: var(--foreground) !important;
+}
+.cl-socialButtonsBlockButton {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.1)) !important;
+  color: var(--foreground) !important;
+}
+.cl-formButtonPrimary {
+  background-color: var(--accent) !important;
+}
+

@@ -1,9 +1,16 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { getFileContent } from "@/lib/github";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { calculateReadingTime, extractPlainText } from "@/lib/reading-utils";
+import { ReaderLayout } from "@/components/reader/ReaderLayout";
+import { SettingsPanel } from "@/components/reader/SettingsPanel";
+import { CacheSyncer } from "@/components/reader/CacheSyncer";
+import { BookmarkPanel } from "@/components/reader/BookmarkPanel";
+import { AutoScroller } from "@/components/reader/AutoScroller";
+import { SearchOverlay } from "@/components/reader/SearchOverlay";
+import { TTSController } from "@/components/reader/TTSController";
 
 interface ReaderPageProps {
   params: Promise<{
@@ -16,11 +23,12 @@ interface ReaderPageProps {
 export default async function ReaderPage({ params }: ReaderPageProps) {
   const { owner, repo, path } = await params;
   const filePath = path.join("/");
+  const fileId = `${owner}/${repo}/${filePath}`;
   
   let content = "";
   try {
     content = await getFileContent(owner, repo, filePath);
-  } catch (error) {
+  } catch {
     return (
       <div className="flex h-screen items-center justify-center">
         <p className="text-destructive">Failed to load file content. Make sure it exists and is a markdown file.</p>
@@ -32,7 +40,10 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
   const fileName = path[path.length - 1];
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 relative">
+      <CacheSyncer owner={owner} repo={repo} path={filePath} content={content} />
+      <SearchOverlay />
+      
       {/* Minimal Header */}
       <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-[720px] mx-auto flex items-center justify-between px-4 h-14">
@@ -53,14 +64,21 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
             </span>
           </div>
 
-          <div className="w-9 h-9" aria-hidden="true" />
+          <div className="flex items-center gap-2">
+            <BookmarkPanel fileId={fileId} />
+            <SettingsPanel />
+          </div>
         </div>
       </header>
 
       {/* Reader Content */}
-      <main className="max-w-[720px] mx-auto px-4 py-8 sm:py-12 pb-24">
+      <ReaderLayout fileId={fileId}>
         <MarkdownRenderer content={content} />
-      </main>
+      </ReaderLayout>
+      
+      {/* Floating Controls */}
+      <AutoScroller />
+      <TTSController content={content} />
     </div>
   );
 }
