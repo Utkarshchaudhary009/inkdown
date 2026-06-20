@@ -6,6 +6,11 @@ import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { calculateReadingTime, extractPlainText } from "@/lib/reading-utils";
 import { ReaderLayout } from "@/components/reader/ReaderLayout";
 import { SettingsPanel } from "@/components/reader/SettingsPanel";
+import { CacheSyncer } from "@/components/reader/CacheSyncer";
+import { BookmarkPanel } from "@/components/reader/BookmarkPanel";
+import { AutoScroller } from "@/components/reader/AutoScroller";
+import { SearchOverlay } from "@/components/reader/SearchOverlay";
+import { TTSController } from "@/components/reader/TTSController";
 
 interface ReaderPageProps {
   params: Promise<{
@@ -35,7 +40,10 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
   const fileName = path[path.length - 1];
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 relative">
+      <CacheSyncer owner={owner} repo={repo} path={filePath} content={content} />
+      <SearchOverlay />
+      
       {/* Minimal Header */}
       <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-[720px] mx-auto flex items-center justify-between px-4 h-14">
@@ -56,7 +64,10 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
             </span>
           </div>
 
-          <SettingsPanel />
+          <div className="flex items-center gap-2">
+            <BookmarkPanel fileId={fileId} />
+            <SettingsPanel />
+          </div>
         </div>
       </header>
 
@@ -64,7 +75,10 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
       <ReaderLayout fileId={fileId}>
         <MarkdownRenderer content={content} />
       </ReaderLayout>
+      
+      {/* Floating Controls */}
+      <AutoScroller />
+      <TTSController content={content} />
     </div>
   );
 }
-
