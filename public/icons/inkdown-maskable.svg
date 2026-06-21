@@ -1,0 +1,9 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">InkDown maskable app icon</title>
+  <desc id="desc">A safe-zone friendly rounded square with the letters In.</desc>
+  <rect width="512" height="512" fill="#7C3AED"/>
+  <rect x="52" y="52" width="408" height="408" rx="62" fill="#0F0F13"/>
+  <path d="M146 157H196V356H146V157Z" fill="#F8FAFC"/>
+  <path d="M237 214H283V234C295.5 218.9 312.9 211.3 335.2 211.3C353.9 211.3 369 217.4 380.6 229.5C392.2 241.6 398 258.7 398 280.8V356H351.8V288.3C351.8 276.9 349.1 268.1 343.8 261.9C338.5 255.7 330.8 252.6 320.7 252.6C309.4 252.6 300.3 256.4 293.4 264C286.6 271.4 283.2 281.6 283.2 294.5V356H237V214Z" fill="#F8FAFC"/>
+  <path d="M149 121H193V143H149V121Z" fill="#A78BFA"/>
+</svg>

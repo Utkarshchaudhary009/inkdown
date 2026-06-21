@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const svix_signature = headerPayload.get('svix-signature');
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Error occured -- no svix headers', {
+    return new Response('Error occurred -- no svix headers', {
       status: 400,
     });
   }
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     }) as WebhookEvent;
   } catch (err) {
     console.error('Error verifying webhook:', err);
-    return new Response('Error occured', {
+    return new Response('Error occurred', {
       status: 400,
     });
   }
@@ -71,7 +71,6 @@ export async function POST(req: Request) {
           avatarUrl: image_url,
         }
       });
-      console.log(`User ${clerkId} upserted in database`);
     } catch (error) {
       console.error('Error inserting user to database', error);
       return new Response('Error saving user', { status: 500 });

@@ -1,0 +1,17 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">InkDown app icon</title>
+  <desc id="desc">A sleek rounded square with the letters In.</desc>
+  <rect width="512" height="512" rx="76" fill="#111118"/>
+  <rect x="18" y="18" width="476" height="476" rx="58" fill="url(#paint0_linear)"/>
+  <rect x="39" y="39" width="434" height="434" rx="42" fill="#0F0F13"/>
+  <path d="M141 157H191V356H141V157Z" fill="#F8FAFC"/>
+  <path d="M233 214H279V234C291.5 218.9 308.9 211.3 331.2 211.3C349.9 211.3 365 217.4 376.6 229.5C388.2 241.6 394 258.7 394 280.8V356H347.8V288.3C347.8 276.9 345.1 268.1 339.8 261.9C334.5 255.7 326.8 252.6 316.7 252.6C305.4 252.6 296.3 256.4 289.4 264C282.6 271.4 279.2 281.6 279.2 294.5V356H233V214Z" fill="#F8FAFC"/>
+  <path d="M144 121H188V143H144V121Z" fill="#A78BFA"/>
+  <defs>
+    <linearGradient id="paint0_linear" x1="64" y1="53" x2="456" y2="459" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED"/>
+      <stop offset="0.52" stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#4ADE80"/>
+    </linearGradient>
+  </defs>
+</svg>
