@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useHighlights } from '@/lib/db-hooks';
+import { toast } from "sonner";
 
 interface HighlightSelectionProps {
   fileId: string;
