@@ -47,6 +47,12 @@ const serwist = new Serwist({
       matcher: ({ request }) => request.destination === 'style' || request.destination === 'script',
       handler: new StaleWhileRevalidate({
         cacheName: 'static-resources',
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 100,
+            maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+          }),
+        ],
       }),
     },
     ...defaultCache,

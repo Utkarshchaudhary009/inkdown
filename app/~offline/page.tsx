@@ -1,4 +1,5 @@
-import Link from 'next/link';
+"use client";
+
 import { Button } from '@/components/ui/button';
 
 export default function OfflinePage() {
@@ -15,8 +16,8 @@ export default function OfflinePage() {
             or return to your library to continue with anything already cached on this device.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/library">Back to library</Link>
+        <Button onClick={() => window.location.reload()}>
+          Try again
         </Button>
       </section>
     </main>

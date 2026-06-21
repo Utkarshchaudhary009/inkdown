@@ -4,10 +4,8 @@ import { SerwistProvider } from "@serwist/next/react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(appUrl),
+  metadataBase: process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL) : undefined,
   title: {
     default: "InkDown",
     template: "%s | InkDown",
@@ -17,20 +15,20 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/icons/inkdown-icon.svg",
-    apple: "/icons/inkdown-icon.svg",
+    apple: "/icons/icon-512x512.png",
   },
   openGraph: {
     type: "website",
     siteName: "InkDown",
     title: "InkDown",
     description: "A Kindle-like GitHub Markdown reader for focused, offline-first reading.",
-    images: ["/icons/inkdown-icon.svg"],
+    images: ["/icons/icon-512x512.png"],
   },
   twitter: {
     card: "summary",
     title: "InkDown",
     description: "A Kindle-like GitHub Markdown reader for focused, offline-first reading.",
-    images: ["/icons/inkdown-icon.svg"],
+    images: ["/icons/icon-512x512.png"],
   },
   formatDetection: {
     telephone: false,
@@ -73,7 +71,12 @@ const FoucPreventionScript = () => {
         const fontSize = localStorage.getItem('inkdown-fontSize') || '1';
         document.documentElement.style.setProperty('--font-size-multiplier', fontSize);
       } catch {
-        document.documentElement.dataset.theme = 'light';
+        // If accessing localStorage or setting CSS variables fails, avoid
+        // overriding an existing theme and instead prefer the system setting.
+        if (!document.documentElement.dataset.theme) {
+          const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.dataset.theme = prefersDark ? 'dark' : 'light';
+        }
       }
     })();
   `;
