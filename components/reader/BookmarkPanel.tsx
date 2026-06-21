@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Bookmark as BookmarkIcon, X, Trash2, ArrowRight } from 'lucide-react';
+import { toast } from "sonner";
 import { useBookmarks } from '@/lib/db-hooks';
 
 interface BookmarkPanelProps {
@@ -90,7 +91,12 @@ export function BookmarkPanel({ fileId }: BookmarkPanelProps) {
                     </span>
                   </div>
                   <button 
-                    onClick={() => bookmark.id && removeBookmark(bookmark.id)}
+                    onClick={() => {
+                      if (bookmark.id) {
+                        removeBookmark(bookmark.id);
+                        toast("Bookmark removed");
+                      }
+                    }}
                     className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                     title="Delete bookmark"
                   >

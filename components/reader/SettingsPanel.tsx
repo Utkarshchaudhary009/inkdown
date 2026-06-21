@@ -8,6 +8,7 @@ import { useSettings } from '@/lib/db-hooks';
 import { useTheme, type Theme } from '@/components/ThemeProvider';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from "sonner";
 
 export function SettingsPanel() {
   const { theme, setTheme } = useTheme();
@@ -15,14 +16,17 @@ export function SettingsPanel() {
 
   const handleThemeChange = (value: string) => {
     setTheme(value as Theme);
+    toast("Theme updated to " + value);
   };
 
   const handleFontFamilyChange = (value: string) => {
     setSetting('fontFamily', value);
+    toast("Font family updated");
   };
 
   const handleFontSizeChange = (value: string) => {
     setSetting('fontSize', value);
+    toast("Font size updated");
   };
 
   return (
