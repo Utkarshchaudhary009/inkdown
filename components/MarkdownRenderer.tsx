@@ -1,8 +1,11 @@
 'use client';
 
-import React, { ElementType, useId, useState, useEffect } from "react";
+import React, { ElementType, useId, useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Virtuoso } from "react-virtuoso";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
 
 // Utility to extract raw text from React children to generate heading IDs
 function extractText(node: React.ReactNode): string {
@@ -81,6 +84,46 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   const [StreamdownModule, setStreamdownModule] = useState<React.ElementType | null>(null);
   const [plugins, setPlugins] = useState<Record<string, unknown> | null>(null);
 
+  const chunks = useMemo(() => {
+    const processor = unified().use(remarkParse);
+    try {
+      const ast = processor.parse(content);
+      const newChunks: string[] = [];
+      let currentGroup = "";
+      const definitions: string[] = [];
+
+      for (const node of ast.children) {
+        if (node.position && node.position.start?.offset !== undefined && node.position.end?.offset !== undefined) {
+          const block = content.slice(node.position.start.offset, node.position.end.offset);
+          
+          if (node.type === 'definition' || node.type === 'footnoteDefinition') {
+            definitions.push(block);
+          } else {
+            currentGroup += block + "\n\n";
+            if (currentGroup.length > 1500) {
+              newChunks.push(currentGroup);
+              currentGroup = "";
+            }
+          }
+        }
+      }
+      if (currentGroup) {
+        newChunks.push(currentGroup);
+      }
+      
+      const definitionsString = definitions.join("\n\n");
+      const finalChunks = newChunks.length ? newChunks : [content];
+      
+      if (definitionsString) {
+        return finalChunks.map(chunk => definitionsString + "\n\n" + chunk);
+      }
+      return finalChunks;
+    } catch (e) {
+      console.error("Failed to parse markdown for chunking", e);
+      return [content];
+    }
+  }, [content]);
+
   useEffect(() => {
     let isMounted = true;
     async function loadHeavyDeps() {
@@ -98,7 +141,6 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         ]);
         
         if (isMounted) {
-          // React expects state to be a function if it's a function itself, so we use a thunk
           setStreamdownModule(() => streamdownMod.Streamdown);
           setPlugins({
             code: codeMod.code,
@@ -114,7 +156,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     return () => { isMounted = false; };
   }, []);
 
-  if (!StreamdownModule || !plugins) {
+  if (!StreamdownModule || !plugins || chunks.length === 0) {
     return (
       <div className="space-y-4 pt-10 max-w-full">
         <Skeleton className="h-10 w-3/4" />
@@ -130,48 +172,54 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
 
   return (
     <div className="markdown-body">
-      <Streamdown
-        plugins={plugins}
-        components={{
-          h1: (props: StreamdownComponentProps) => <HeadingRenderer level={1} {...omitNode(props)} />,
-          h2: (props: StreamdownComponentProps) => <HeadingRenderer level={2} {...omitNode(props)} />,
-          h3: (props: StreamdownComponentProps) => <HeadingRenderer level={3} {...omitNode(props)} />,
-          h4: (props: StreamdownComponentProps) => <HeadingRenderer level={4} {...omitNode(props)} />,
-          h5: (props: StreamdownComponentProps) => <HeadingRenderer level={5} {...omitNode(props)} />,
-          h6: (props: StreamdownComponentProps) => <HeadingRenderer level={6} {...omitNode(props)} />,
-          img: (props: StreamdownComponentProps & React.ImgHTMLAttributes<HTMLImageElement>) => <ImageRenderer {...omitNode(props)} />,
-          p: (componentProps: StreamdownComponentProps) => {
-            const { className, children, ...props } = omitNode(componentProps);
-            return <p className={cn("leading-7 [&:not(:first-child)]:mt-6", className)} {...props}>{children}</p>;
-          },
-          a: (componentProps: StreamdownComponentProps & React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-            const { className, children, ...props } = omitNode(componentProps);
-            return <a className={cn("font-medium text-primary underline underline-offset-4", className)} {...props}>{children}</a>;
-          },
-          ul: (componentProps: StreamdownComponentProps) => {
-            const { className, children, ...props } = omitNode(componentProps);
-            return <ul className={cn("my-6 ml-6 list-disc [&>li]:mt-2", className)} {...props}>{children}</ul>;
-          },
-          ol: (componentProps: StreamdownComponentProps) => {
-            const { className, children, ...props } = omitNode(componentProps);
-            return <ol className={cn("my-6 ml-6 list-decimal [&>li]:mt-2", className)} {...props}>{children}</ol>;
-          },
-          li: (componentProps: StreamdownComponentProps & React.LiHTMLAttributes<HTMLLIElement>) => {
-            const { className, children, ...props } = omitNode(componentProps);
-            return <li className={cn("leading-7", className)} {...props}>{children}</li>;
-          },
-          blockquote: (componentProps: StreamdownComponentProps & React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => {
-            const { className, children, ...props } = omitNode(componentProps);
-            return <blockquote className={cn("mt-6 border-l-2 border-primary pl-6 italic", className)} {...props}>{children}</blockquote>;
-          },
-          inlineCode: (componentProps: StreamdownComponentProps) => {
-            const { className, children, ...props } = omitNode(componentProps);
-            return <code className={cn("relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold", className)} {...props}>{children}</code>;
-          },
-        }}
-      >
-        {content}
-      </Streamdown>
+      <Virtuoso
+        useWindowScroll
+        data={chunks}
+        itemContent={(_, chunk) => (
+          <Streamdown
+            plugins={plugins}
+            components={{
+              h1: (props: StreamdownComponentProps) => <HeadingRenderer level={1} {...omitNode(props)} />,
+              h2: (props: StreamdownComponentProps) => <HeadingRenderer level={2} {...omitNode(props)} />,
+              h3: (props: StreamdownComponentProps) => <HeadingRenderer level={3} {...omitNode(props)} />,
+              h4: (props: StreamdownComponentProps) => <HeadingRenderer level={4} {...omitNode(props)} />,
+              h5: (props: StreamdownComponentProps) => <HeadingRenderer level={5} {...omitNode(props)} />,
+              h6: (props: StreamdownComponentProps) => <HeadingRenderer level={6} {...omitNode(props)} />,
+              img: (props: StreamdownComponentProps & React.ImgHTMLAttributes<HTMLImageElement>) => <ImageRenderer {...omitNode(props)} />,
+              p: (componentProps: StreamdownComponentProps) => {
+                const { className, children, ...props } = omitNode(componentProps);
+                return <p className={cn("leading-7 [&:not(:first-child)]:mt-6", className)} {...props}>{children}</p>;
+              },
+              a: (componentProps: StreamdownComponentProps & React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+                const { className, children, ...props } = omitNode(componentProps);
+                return <a className={cn("font-medium text-primary underline underline-offset-4", className)} {...props}>{children}</a>;
+              },
+              ul: (componentProps: StreamdownComponentProps) => {
+                const { className, children, ...props } = omitNode(componentProps);
+                return <ul className={cn("my-6 ml-6 list-disc [&>li]:mt-2", className)} {...props}>{children}</ul>;
+              },
+              ol: (componentProps: StreamdownComponentProps) => {
+                const { className, children, ...props } = omitNode(componentProps);
+                return <ol className={cn("my-6 ml-6 list-decimal [&>li]:mt-2", className)} {...props}>{children}</ol>;
+              },
+              li: (componentProps: StreamdownComponentProps & React.LiHTMLAttributes<HTMLLIElement>) => {
+                const { className, children, ...props } = omitNode(componentProps);
+                return <li className={cn("leading-7", className)} {...props}>{children}</li>;
+              },
+              blockquote: (componentProps: StreamdownComponentProps & React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => {
+                const { className, children, ...props } = omitNode(componentProps);
+                return <blockquote className={cn("mt-6 border-l-2 border-primary pl-6 italic", className)} {...props}>{children}</blockquote>;
+              },
+              inlineCode: (componentProps: StreamdownComponentProps) => {
+                const { className, children, ...props } = omitNode(componentProps);
+                return <code className={cn("relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold", className)} {...props}>{children}</code>;
+              },
+            }}
+          >
+            {chunk}
+          </Streamdown>
+        )}
+      />
     </div>
   );
 }
