@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { SerwistProvider } from "@serwist/next/react";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { GlobalSync } from "@/components/GlobalSync";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -98,6 +100,8 @@ export default function RootLayout({
           <SerwistProvider swUrl="/sw.js">
             <ThemeProvider>
               {children}
+              <GlobalSync />
+              <Toaster position="bottom-right" />
             </ThemeProvider>
           </SerwistProvider>
         </ClerkProvider>

@@ -1,5 +1,12 @@
-import { auth, clerkClient } from '@clerk/nextjs/server';
+'use server';
+
+import { auth } from '@clerk/nextjs/server';
 import { Octokit } from '@octokit/rest';
+import { createAppAuth } from '@octokit/auth-app';
+import { db } from '@/lib/db';
+import { users } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
+import { type Repo } from '@/components/repo-card';
 
 export async function getOctokit() {
   const { userId } = await auth();
@@ -7,24 +14,41 @@ export async function getOctokit() {
     throw new Error('Not authenticated');
   }
 
-  const client = await clerkClient();
-  const tokenResponse = await client.users.getUserOauthAccessToken(userId, 'oauth_github');
-  
-  const token = tokenResponse.data[0]?.token;
-  if (!token) {
-    throw new Error('GitHub OAuth token not found');
+  const user = await db.query.users.findFirst({
+    where: eq(users.clerkId, userId),
+    columns: { githubInstallationId: true }
+  });
+
+  const installationId = user?.githubInstallationId;
+
+  if (!installationId) {
+    throw new Error('GITHUB_APP_NOT_INSTALLED');
   }
 
-  return new Octokit({ auth: token });
+  const appId = process.env.GITHUB_APP_ID;
+  const privateKey = process.env.GITHUB_APP_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+  if (!appId || !privateKey) {
+    throw new Error('GitHub App credentials missing in environment variables');
+  }
+
+  return new Octokit({
+    authStrategy: createAppAuth,
+    auth: {
+      appId,
+      privateKey,
+      installationId: parseInt(installationId, 10),
+    },
+  });
 }
 
-export async function getUserRepos() {
+export async function getUserRepos(): Promise<Repo[]> {
   const octokit = await getOctokit();
   const { data } = await octokit.repos.listForAuthenticatedUser({
     sort: 'updated',
     per_page: 100,
   });
-  return data;
+  return data as unknown as Repo[];
 }
 
 export async function getRepoTree(owner: string, repo: string) {
@@ -40,7 +64,14 @@ export async function getRepoTree(owner: string, repo: string) {
     recursive: '1',
   });
 
-  return data.tree.filter((file) => file.path && file.path.endsWith('.md'));
+  if (data.truncated) {
+    console.warn(`[InkDown] Repository tree for ${owner}/${repo} was truncated by GitHub API (exceeded 100,000 limits). Some files may be missing.`);
+  }
+
+  return {
+    truncated: data.truncated,
+    tree: data.tree.filter((file) => file.path && file.path.endsWith('.md'))
+  };
 }
 
 export async function getFileContent(owner: string, repo: string, path: string) {

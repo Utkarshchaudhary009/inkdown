@@ -1,11 +1,8 @@
 'use client';
 
-import React, { ElementType } from "react";
-import { Streamdown } from "streamdown";
-import { code } from "@streamdown/code";
-import { math } from "@streamdown/math";
-import { mermaid } from "@streamdown/mermaid";
+import React, { ElementType, useId, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Utility to extract raw text from React children to generate heading IDs
 function extractText(node: React.ReactNode): string {
@@ -26,21 +23,16 @@ function generateId(text: string): string {
 
 interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
   level: 1 | 2 | 3 | 4 | 5 | 6;
-  headingCounts: Record<string, number>;
 }
 
-const HeadingRenderer = ({ level, children, className, headingCounts, ...props }: HeadingProps) => {
+const HeadingRenderer = ({ level, children, className, ...props }: HeadingProps) => {
   const text = extractText(children);
   const baseId = generateId(text);
+  const reactId = useId().replace(/:/g, '');
   
-  let id = baseId;
-  if (headingCounts[baseId]) {
-    const count = headingCounts[baseId];
-    headingCounts[baseId] = count + 1;
-    id = `${baseId}-${count}`;
-  } else {
-    headingCounts[baseId] = 1;
-  }
+  // Combine semantic base ID with guaranteed unique reactId
+  const id = `${baseId}-${reactId}`;
+  
   const Tag = `h${level}` as ElementType;
   
   let sizeClass = "";
@@ -86,25 +78,67 @@ function omitNode<T extends StreamdownComponentProps>(props: T) {
 }
 
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
-  const headingCounts = React.useRef<Record<string, number>>({});
-  // Reset counts on every render to ensure consistent IDs
-  headingCounts.current = {};
+  const [StreamdownModule, setStreamdownModule] = useState<React.ElementType | null>(null);
+  const [plugins, setPlugins] = useState<Record<string, unknown> | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadHeavyDeps() {
+      try {
+        const [
+          streamdownMod,
+          codeMod,
+          mathMod,
+          mermaidMod
+        ] = await Promise.all([
+          import("streamdown"),
+          import("@streamdown/code"),
+          import("@streamdown/math"),
+          import("@streamdown/mermaid")
+        ]);
+        
+        if (isMounted) {
+          // React expects state to be a function if it's a function itself, so we use a thunk
+          setStreamdownModule(() => streamdownMod.Streamdown);
+          setPlugins({
+            code: codeMod.code,
+            math: mathMod.math,
+            mermaid: mermaidMod.mermaid,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load markdown renderer dependencies", err);
+      }
+    }
+    loadHeavyDeps();
+    return () => { isMounted = false; };
+  }, []);
+
+  if (!StreamdownModule || !plugins) {
+    return (
+      <div className="space-y-4 pt-10 max-w-full">
+        <Skeleton className="h-10 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <Skeleton className="h-64 w-full mt-8" />
+      </div>
+    );
+  }
+
+  const Streamdown = StreamdownModule;
 
   return (
     <div className="markdown-body">
       <Streamdown
-        plugins={{
-          code,
-          math,
-          mermaid,
-        }}
+        plugins={plugins}
         components={{
-          h1: (props: StreamdownComponentProps) => <HeadingRenderer level={1} headingCounts={headingCounts.current} {...omitNode(props)} />,
-          h2: (props: StreamdownComponentProps) => <HeadingRenderer level={2} headingCounts={headingCounts.current} {...omitNode(props)} />,
-          h3: (props: StreamdownComponentProps) => <HeadingRenderer level={3} headingCounts={headingCounts.current} {...omitNode(props)} />,
-          h4: (props: StreamdownComponentProps) => <HeadingRenderer level={4} headingCounts={headingCounts.current} {...omitNode(props)} />,
-          h5: (props: StreamdownComponentProps) => <HeadingRenderer level={5} headingCounts={headingCounts.current} {...omitNode(props)} />,
-          h6: (props: StreamdownComponentProps) => <HeadingRenderer level={6} headingCounts={headingCounts.current} {...omitNode(props)} />,
+          h1: (props: StreamdownComponentProps) => <HeadingRenderer level={1} {...omitNode(props)} />,
+          h2: (props: StreamdownComponentProps) => <HeadingRenderer level={2} {...omitNode(props)} />,
+          h3: (props: StreamdownComponentProps) => <HeadingRenderer level={3} {...omitNode(props)} />,
+          h4: (props: StreamdownComponentProps) => <HeadingRenderer level={4} {...omitNode(props)} />,
+          h5: (props: StreamdownComponentProps) => <HeadingRenderer level={5} {...omitNode(props)} />,
+          h6: (props: StreamdownComponentProps) => <HeadingRenderer level={6} {...omitNode(props)} />,
           img: (props: StreamdownComponentProps & React.ImgHTMLAttributes<HTMLImageElement>) => <ImageRenderer {...omitNode(props)} />,
           p: (componentProps: StreamdownComponentProps) => {
             const { className, children, ...props } = omitNode(componentProps);

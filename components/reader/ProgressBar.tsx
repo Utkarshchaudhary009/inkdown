@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useReadingProgress } from '@/lib/db-hooks';
+import { getScrollPercentage } from '@/lib/scroll-utils';
 
 interface ProgressBarProps {
   fileId: string;
@@ -9,31 +10,45 @@ interface ProgressBarProps {
 
 export function ProgressBar({ fileId }: ProgressBarProps) {
   const { progress: savedProgress, setProgress } = useReadingProgress(fileId);
-  const [currentProgress, setCurrentProgress] = useState(0);
+  const barRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (savedProgress?.scrollPercent) {
-      setCurrentProgress(savedProgress.scrollPercent);
+    if (savedProgress?.scrollPercent && barRef.current && (!barRef.current.style.width || barRef.current.style.width === '0%')) {
+      barRef.current.style.width = `${savedProgress.scrollPercent}%`;
     }
   }, [savedProgress]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
+    
     const calculateProgress = () => {
-      const scrollY = window.scrollY;
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const percent = totalHeight > 0 ? Math.round((scrollY / totalHeight) * 100) : 0;
-      setCurrentProgress(percent);
+      if (rafRef.current) return;
+      
+      rafRef.current = requestAnimationFrame(() => {
+        const percent = getScrollPercentage();
+        
+        if (barRef.current) {
+          barRef.current.style.width = `${percent}%`;
+        }
 
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        setProgress(percent);
-      }, 1000); // Save after 1 second of no scrolling
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          setProgress(Math.round(percent));
+        }, 1000);
+
+        rafRef.current = null;
+      });
     };
 
     window.addEventListener('scroll', calculateProgress, { passive: true });
+    
+    // Trigger once on mount
+    calculateProgress();
+    
     return () => {
       window.removeEventListener('scroll', calculateProgress);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       clearTimeout(timeout);
     };
   }, [setProgress]);
@@ -41,8 +56,9 @@ export function ProgressBar({ fileId }: ProgressBarProps) {
   return (
     <div className="fixed top-0 left-0 w-full h-1 z-50 bg-transparent">
       <div 
-        className="h-full bg-primary transition-all duration-150 ease-out"
-        style={{ width: `${currentProgress}%` }}
+        ref={barRef}
+        className="h-full bg-primary will-change-[width]"
+        style={{ width: '0%' }}
       />
     </div>
   );

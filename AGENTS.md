@@ -27,6 +27,12 @@ This is a **production-quality** app deployed on **Vercel**. There is no room fo
 
 ---
 
+## Database & Security
+
+**CRITICAL:** The project exclusively uses **Neon DB** (not Supabase) with Drizzle ORM. Because Neon lacks connection-level Row Level Security (RLS) bound to Clerk JWTs, tenant isolation **MUST** be manually enforced. Every server action or API route that queries or mutates user data must explicitly filter by the authenticated `clerkId`.
+
+---
+
 ## Core Priorities
 
 1. **Performance first.** This is a reader — it must feel instant. Every millisecond counts for First Contentful Paint and Time to Interactive.

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Play, Pause, Square, SkipForward, Volume2 } from 'lucide-react';
 import { extractPlainText } from '@/lib/reading-utils';
+import { toast } from 'sonner';
 
 interface TTSControllerProps {
   content: string;
@@ -17,6 +18,14 @@ export function TTSController({ content }: TTSControllerProps) {
   const [rate, setRate] = useState(1);
   const [sentences, setSentences] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const isPlayingRef = useRef(isPlaying);
+  const isPausedRef = useRef(isPaused);
+  const rateRef = useRef(rate);
+  
+  useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+  useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
+  useEffect(() => { rateRef.current = rate; }, [rate]);
 
   // Initialize Speech Synthesis and Voices
   useEffect(() => {
@@ -37,17 +46,27 @@ export function TTSController({ content }: TTSControllerProps) {
       window.speechSynthesis.onvoiceschanged = loadVoices;
     }
 
-    // Split content into reasonable sentences
-    const text = extractPlainText(content);
-    // Simple sentence split: punctuation followed by space or newline
-    const splits = text.match(/[^.!?\n]+[.!?\n]+/g) || [text];
-    setSentences(splits.map(s => s.trim()).filter(s => s.length > 0));
+    let isMounted = true;
+    async function parseContent() {
+      try {
+        const text = await extractPlainText(content);
+        if (!isMounted) return;
+        const splits = text.match(/[^.!?\n]+[.!?\n]+/g) || [text];
+        setSentences(splits.map(s => s.trim()).filter(s => s.length > 0));
+      } catch (err) {
+        console.error(err);
+        if (isMounted) toast.error("Failed to parse text for speech synthesis.");
+      }
+    }
+
+    parseContent();
 
     return () => {
+      isMounted = false;
       window.speechSynthesis.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]); // Removed selectedVoice from dependencies to prevent reset loop
+  }, [content]); // selectedVoice omitted intentionally
 
   const speak = useCallback((index: number) => {
     if (index >= sentences.length) {
@@ -63,16 +82,11 @@ export function TTSController({ content }: TTSControllerProps) {
       if (voice) utterance.voice = voice;
     }
     
-    utterance.rate = rate;
+    utterance.rate = rateRef.current;
     
     utterance.onend = () => {
       setCurrentIndex(prev => {
         const next = prev + 1;
-        if (isPlaying && !isPaused) {
-          // React state might be stale in this callback, but we trigger the effect via state changes or recursive call?
-          // Actually, recursive call is better for SpeechSynthesis to avoid state cycle issues.
-          // Wait, better to just let the effect handle the next sentence by updating index.
-        }
         return next;
       });
     };
@@ -80,16 +94,16 @@ export function TTSController({ content }: TTSControllerProps) {
     utterance.onerror = (e) => {
       console.error('SpeechSynthesisError', e);
       setIsPlaying(false);
+      toast.error(`Speech synthesis error: ${e.error}`);
     };
 
     window.speechSynthesis.speak(utterance);
-  }, [sentences, selectedVoice, voices, rate, isPlaying, isPaused]);
+  }, [sentences, selectedVoice, voices]);
 
-  // Effect to automatically speak next sentence when index changes
   useEffect(() => {
     if (isPlaying && !isPaused && currentIndex < sentences.length) {
       speak(currentIndex);
-    } else if (currentIndex >= sentences.length) {
+    } else if (currentIndex >= sentences.length && sentences.length > 0) {
       setIsPlaying(false);
       setCurrentIndex(0);
     }
@@ -122,9 +136,6 @@ export function TTSController({ content }: TTSControllerProps) {
   const skipForward = () => {
     window.speechSynthesis.cancel();
     setCurrentIndex(prev => Math.min(prev + 1, sentences.length - 1));
-    if (isPlaying && !isPaused) {
-      // The effect will pick it up
-    }
   };
 
   if (!isOpen) {
