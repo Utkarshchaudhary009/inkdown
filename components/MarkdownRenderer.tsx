@@ -146,7 +146,14 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           },
           a: (componentProps: StreamdownComponentProps & React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
             const { className, children, ...props } = omitNode(componentProps);
-            return <a className={cn("font-medium text-primary underline underline-offset-4", className)} {...props}>{children}</a>;
+            let href = props.href;
+            if (href) {
+              const lowerHref = href.toLowerCase().trim();
+              if (lowerHref.startsWith('javascript:') || lowerHref.startsWith('vbscript:') || lowerHref.startsWith('data:')) {
+                href = '#';
+              }
+            }
+            return <a className={cn("font-medium text-primary underline underline-offset-4", className)} {...props} href={href}>{children}</a>;
           },
           ul: (componentProps: StreamdownComponentProps) => {
             const { className, children, ...props } = omitNode(componentProps);
