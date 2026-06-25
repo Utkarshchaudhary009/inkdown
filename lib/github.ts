@@ -5,8 +5,14 @@ import { Octokit } from '@octokit/rest';
 import { createAppAuth } from '@octokit/auth-app';
 import { db } from '@/lib/db';
 import { users } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { type Repo } from '@/components/repo-card';
+
+const getInstallationQuery = db
+  .select({ githubInstallationId: users.githubInstallationId })
+  .from(users)
+  .where(eq(users.clerkId, sql.placeholder('userId')))
+  .prepare('get_github_installation_query');
 
 export async function getOctokit() {
   const { userId } = await auth();
@@ -14,10 +20,8 @@ export async function getOctokit() {
     throw new Error('Not authenticated');
   }
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.clerkId, userId),
-    columns: { githubInstallationId: true }
-  });
+  const results = await getInstallationQuery.execute({ userId });
+  const user = results[0];
 
   const installationId = user?.githubInstallationId;
 

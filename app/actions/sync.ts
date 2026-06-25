@@ -3,7 +3,32 @@
 import { db } from '@/lib/db';
 import { readingProgress, highlights, bookmarks } from '@/lib/schema';
 import { auth } from '@clerk/nextjs/server';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
+
+const findProgressQuery = db
+  .select({ id: readingProgress.id, updatedAt: readingProgress.updatedAt })
+  .from(readingProgress)
+  .where(
+    and(
+      eq(readingProgress.clerkId, sql.placeholder('userId')),
+      eq(readingProgress.repoFullName, sql.placeholder('repoFullName')),
+      eq(readingProgress.filePath, sql.placeholder('filePath'))
+    )
+  )
+  .prepare('find_progress');
+
+const findBookmarkQuery = db
+  .select({ id: bookmarks.id })
+  .from(bookmarks)
+  .where(
+    and(
+      eq(bookmarks.clerkId, sql.placeholder('userId')),
+      eq(bookmarks.repoFullName, sql.placeholder('repoFullName')),
+      eq(bookmarks.filePath, sql.placeholder('filePath')),
+      eq(bookmarks.scrollPercentage, sql.placeholder('scrollPercentage'))
+    )
+  )
+  .prepare('find_bookmark');
 
 function parseFileId(fileId: string) {
   const parts = fileId.split('/');
@@ -22,13 +47,8 @@ export async function syncReadingProgress(progressData: { fileId: string; scroll
   for (const progress of progressData) {
     const { repoFullName, filePath } = parseFileId(progress.fileId);
     
-    const existing = await db.query.readingProgress.findFirst({
-      where: and(
-        eq(readingProgress.clerkId, userId),
-        eq(readingProgress.repoFullName, repoFullName),
-        eq(readingProgress.filePath, filePath)
-      )
-    });
+    const results = await findProgressQuery.execute({ userId, repoFullName, filePath });
+    const existing = results[0];
 
     if (existing) {
       if (progress.lastReadAt > existing.updatedAt.getTime()) {
@@ -83,14 +103,8 @@ export async function syncBookmarks(bookmarksData: { fileId: string; scrollPerce
     const { repoFullName, filePath } = parseFileId(item.fileId);
     
     // Check if bookmark exists
-    const existing = await db.query.bookmarks.findFirst({
-      where: and(
-        eq(bookmarks.clerkId, userId),
-        eq(bookmarks.repoFullName, repoFullName),
-        eq(bookmarks.filePath, filePath),
-        eq(bookmarks.scrollPercentage, item.scrollPercent)
-      )
-    });
+    const results = await findBookmarkQuery.execute({ userId, repoFullName, filePath, scrollPercentage: item.scrollPercent });
+    const existing = results[0];
 
     if (!existing) {
       await db.insert(bookmarks).values({

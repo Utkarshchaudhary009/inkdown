@@ -3,7 +3,13 @@
 import { db } from '@/lib/db';
 import { users } from '@/lib/schema';
 import { auth } from '@clerk/nextjs/server';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
+
+const getInstallationQuery = db
+  .select({ githubInstallationId: users.githubInstallationId })
+  .from(users)
+  .where(eq(users.clerkId, sql.placeholder('userId')))
+  .prepare('get_installation_query');
 
 export async function getUserInstallationStatus() {
   const { userId } = await auth();
@@ -11,12 +17,8 @@ export async function getUserInstallationStatus() {
     return { isInstalled: false };
   }
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.clerkId, userId),
-    columns: {
-      githubInstallationId: true,
-    }
-  });
+  const result = await getInstallationQuery.execute({ userId });
+  const user = result[0];
 
   return { 
     isInstalled: !!user?.githubInstallationId,

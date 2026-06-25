@@ -30,6 +30,7 @@
     "radix-ui": "^1.6.0",
     "react": "^19.1.4",
     "react-dom": "^19.1.4",
+    "react-virtuoso": "^4.18.8",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
     "serwist": "^9.5.11",

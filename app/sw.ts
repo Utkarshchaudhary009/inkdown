@@ -55,6 +55,19 @@ const serwist = new Serwist({
         ],
       }),
     },
+    {
+      matcher: ({ request, url }) => request.destination === 'document' || url.pathname.includes('/_next/data/'),
+      handler: new NetworkFirst({
+        cacheName: 'pages',
+        networkTimeoutSeconds: 3,
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 100,
+            maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+          }),
+        ],
+      }),
+    },
     ...defaultCache,
   ],
   fallbacks: {
