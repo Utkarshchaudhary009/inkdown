@@ -8,8 +8,7 @@ import { eq, sql } from 'drizzle-orm';
 const getInstallationQuery = db
   .select({ githubInstallationId: users.githubInstallationId })
   .from(users)
-  .where(eq(users.clerkId, sql.placeholder('userId')))
-  .prepare('get_installation_query');
+  .where(eq(users.clerkId, sql.placeholder('userId')));
 
 export async function getUserInstallationStatus() {
   const { userId } = await auth();

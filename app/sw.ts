@@ -4,6 +4,10 @@ import { defaultCache } from '@serwist/next/worker';
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
 import { CacheFirst, ExpirationPlugin, NetworkFirst, Serwist, StaleWhileRevalidate } from 'serwist';
 
+const PAGES_CACHE_TIMEOUT_SECONDS = 3;
+const PAGES_CACHE_MAX_ENTRIES = 100;
+const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
+
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
     __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
@@ -56,14 +60,14 @@ const serwist = new Serwist({
       }),
     },
     {
-      matcher: ({ request, url }) => request.destination === 'document' || url.pathname.includes('/_next/data/'),
+      matcher: ({ request }) => request.destination === 'document',
       handler: new NetworkFirst({
         cacheName: 'pages',
-        networkTimeoutSeconds: 3,
+        networkTimeoutSeconds: PAGES_CACHE_TIMEOUT_SECONDS,
         plugins: [
           new ExpirationPlugin({
-            maxEntries: 100,
-            maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+            maxEntries: PAGES_CACHE_MAX_ENTRIES,
+            maxAgeSeconds: SEVEN_DAYS_IN_SECONDS,
           }),
         ],
       }),

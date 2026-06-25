@@ -14,8 +14,7 @@ const findProgressQuery = db
       eq(readingProgress.repoFullName, sql.placeholder('repoFullName')),
       eq(readingProgress.filePath, sql.placeholder('filePath'))
     )
-  )
-  .prepare('find_progress');
+  );
 
 const findBookmarkQuery = db
   .select({ id: bookmarks.id })
@@ -24,11 +23,9 @@ const findBookmarkQuery = db
     and(
       eq(bookmarks.clerkId, sql.placeholder('userId')),
       eq(bookmarks.repoFullName, sql.placeholder('repoFullName')),
-      eq(bookmarks.filePath, sql.placeholder('filePath')),
-      eq(bookmarks.scrollPercentage, sql.placeholder('scrollPercentage'))
+      eq(bookmarks.filePath, sql.placeholder('filePath'))
     )
-  )
-  .prepare('find_bookmark');
+  );
 
 function parseFileId(fileId: string) {
   const parts = fileId.split('/');
@@ -103,7 +100,7 @@ export async function syncBookmarks(bookmarksData: { fileId: string; scrollPerce
     const { repoFullName, filePath } = parseFileId(item.fileId);
     
     // Check if bookmark exists
-    const results = await findBookmarkQuery.execute({ userId, repoFullName, filePath, scrollPercentage: item.scrollPercent });
+    const results = await findBookmarkQuery.execute({ userId, repoFullName, filePath });
     const existing = results[0];
 
     if (!existing) {

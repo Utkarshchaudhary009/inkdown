@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ElementType, useId, useState, useEffect } from "react";
+import React, { ElementType, useId, useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Virtuoso } from "react-virtuoso";
@@ -83,32 +83,44 @@ function omitNode<T extends StreamdownComponentProps>(props: T) {
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   const [StreamdownModule, setStreamdownModule] = useState<React.ElementType | null>(null);
   const [plugins, setPlugins] = useState<Record<string, unknown> | null>(null);
-  const [chunks, setChunks] = useState<string[]>([]);
 
-  useEffect(() => {
+  const chunks = useMemo(() => {
     const processor = unified().use(remarkParse);
     try {
       const ast = processor.parse(content);
       const newChunks: string[] = [];
       let currentGroup = "";
+      const definitions: string[] = [];
 
       for (const node of ast.children) {
-        if (node.position) {
+        if (node.position && node.position.start?.offset !== undefined && node.position.end?.offset !== undefined) {
           const block = content.slice(node.position.start.offset, node.position.end.offset);
-          currentGroup += block + "\n\n";
-          if (currentGroup.length > 1500) {
-            newChunks.push(currentGroup.trim());
-            currentGroup = "";
+          
+          if (node.type === 'definition' || node.type === 'footnoteDefinition') {
+            definitions.push(block);
+          } else {
+            currentGroup += block + "\n\n";
+            if (currentGroup.length > 1500) {
+              newChunks.push(currentGroup);
+              currentGroup = "";
+            }
           }
         }
       }
       if (currentGroup) {
-        newChunks.push(currentGroup.trim());
+        newChunks.push(currentGroup);
       }
-      setChunks(newChunks.length ? newChunks : [content]);
+      
+      const definitionsString = definitions.join("\n\n");
+      const finalChunks = newChunks.length ? newChunks : [content];
+      
+      if (definitionsString) {
+        return finalChunks.map(chunk => definitionsString + "\n\n" + chunk);
+      }
+      return finalChunks;
     } catch (e) {
       console.error("Failed to parse markdown for chunking", e);
-      setChunks([content]);
+      return [content];
     }
   }, [content]);
 
@@ -163,7 +175,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       <Virtuoso
         useWindowScroll
         data={chunks}
-        itemContent={(index, chunk) => (
+        itemContent={(_, chunk) => (
           <Streamdown
             plugins={plugins}
             components={{

@@ -11,8 +11,7 @@ import { type Repo } from '@/components/repo-card';
 const getInstallationQuery = db
   .select({ githubInstallationId: users.githubInstallationId })
   .from(users)
-  .where(eq(users.clerkId, sql.placeholder('userId')))
-  .prepare('get_github_installation_query');
+  .where(eq(users.clerkId, sql.placeholder('userId')));
 
 export async function getOctokit() {
   const { userId } = await auth();
