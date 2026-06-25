@@ -1,10 +1,11 @@
-import { pgTable, text, timestamp, integer, uuid, unique } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, uuid, unique, index } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   clerkId: text('clerk_id').primaryKey(),
   email: text('email').notNull(),
   name: text('name'),
   avatarUrl: text('avatar_url'),
+  githubInstallationId: text('github_installation_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -29,7 +30,9 @@ export const highlights = pgTable('highlights', {
   serializedRange: text('serialized_range').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (t) => [
+  index('highlights_clerk_repo_file_idx').on(t.clerkId, t.repoFullName, t.filePath)
+]);
 
 export const bookmarks = pgTable('bookmarks', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -40,4 +43,16 @@ export const bookmarks = pgTable('bookmarks', {
   label: text('label'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (t) => [
+  index('bookmarks_clerk_repo_file_idx').on(t.clerkId, t.repoFullName, t.filePath)
+]);
+
+export const likedDocuments = pgTable('liked_documents', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clerkId: text('clerk_id').notNull().references(() => users.clerkId, { onDelete: 'cascade' }),
+  repoFullName: text('repo_full_name').notNull(),
+  filePath: text('file_path').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  unique('liked_documents_unique_idx').on(t.clerkId, t.repoFullName, t.filePath)
+]);

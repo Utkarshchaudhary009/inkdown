@@ -50,24 +50,13 @@ const disableTransitions = () => {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { settings, setSetting } = useSettings();
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('inkdown-theme') as Theme) || 'system';
-    }
-    return 'system';
-  });
-  
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark' | 'sepia' | 'night' | 'forest'>(() => {
-    if (typeof window !== 'undefined') {
-      const initialTheme = (localStorage.getItem('inkdown-theme') as Theme) || 'system';
-      if (initialTheme === 'system') {
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        return isDark ? 'dark' : 'light';
-      }
-      return initialTheme as 'light' | 'dark' | 'sepia' | 'night' | 'forest';
-    }
-    return 'light';
-  });
+  const [theme, setThemeState] = useState<Theme>('system');
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark' | 'sepia' | 'night' | 'forest'>('light');
+  useEffect(() => {
+    const storedTheme = (localStorage.getItem('inkdown-theme') as Theme) || 'system';
+    setThemeState(storedTheme);
+    setResolvedTheme(resolveTheme(storedTheme));
+  }, []);
 
   const isFirstLoad = useRef(true);
 

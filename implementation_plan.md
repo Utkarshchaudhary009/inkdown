@@ -5,7 +5,10 @@ A premium, offline-first PWA that turns your GitHub markdown files into a beauti
 ## User Review Required
 
 > [!IMPORTANT]
-> **GitHub OAuth App Setup**: Clerk handles authentication with GitHub natively. You will configure the GitHub provider directly in your Clerk dashboard and get `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` for your app's environment variables.
+> **GitHub App Setup**: We will use a GitHub App for secure, granular access to private repositories. You will need to create a GitHub App in your developer settings with `Contents: Read-only` permissions and configure it with a Setup URL. We'll need the App ID, Client ID, Client Secret, and Private Key.
+
+> [!IMPORTANT]
+> **Clerk Auth Setup**: Clerk handles identity. You will configure the GitHub provider in your Clerk dashboard for basic login (no extra scopes needed) and get `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.
 
 > [!IMPORTANT]
 > **Vercel Deployment**: The app will be configured for Vercel deployment. You'll need a Vercel account and to connect your repo.
@@ -32,9 +35,10 @@ graph TB
     end
 
     subgraph "Auth & Cloud Data"
-        CLERK["Clerk Auth<br/>GitHub Provider"]
+        CLERK["Clerk Auth<br/>GitHub SSO"]
         NEON["Neon DB<br/>Serverless Postgres"]
         WEBHOOK["Clerk Webhook<br/>(User Sync)"]
+        GH_APP["GitHub App Auth<br/>(Installation Tokens)"]
     end
 
     subgraph "GitHub Data"
@@ -46,7 +50,9 @@ graph TB
     CLERK -->|user.created| WEBHOOK
     WEBHOOK -->|Drizzle ORM| NEON
     UI -->|Drizzle ORM| NEON
-    UI --> GH_API
+    UI -->|Install App| GH_APP
+    GH_APP -->|Save installation_id| NEON
+    UI -->|API Routes + GH Token| GH_API
     GH_API --> GH_REPOS
     UI --> MD
     UI --> IDB
@@ -59,6 +65,7 @@ graph TB
     style CLERK fill:#dc2626,color:#fff
     style NEON fill:#0ea5e9,color:#fff
     style GH_API fill:#1f2937,color:#fff
+    style GH_APP fill:#2563eb,color:#fff
 ```
 
 ---
@@ -89,7 +96,7 @@ Next.js 15 project with dependencies:
 - `@neondatabase/serverless`, `drizzle-orm`, `drizzle-kit` (Database)
 - `svix` (Webhook verification)
 - `@serwist/next`, `serwist` (PWA/service worker)
-- `@octokit/rest` (GitHub API)
+- `@octokit/rest`, `@octokit/auth-app` (GitHub API & App Auth)
 - `streamdown`, plugins... (MD rendering)
 - `tailwindcss`, `lucide-react`, `class-variance-authority`, `clsx`, `tailwind-merge` (Shadcn UI requirements)
 - `dexie`, `dexie-react-hooks` (Offline Cache)
@@ -103,6 +110,11 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 CLERK_WEBHOOK_SECRET=
 DATABASE_URL=
+NEXT_PUBLIC_GITHUB_APP_NAME=
+GITHUB_APP_ID=
+GITHUB_APP_CLIENT_ID=
+GITHUB_APP_CLIENT_SECRET=
+GITHUB_APP_PRIVATE_KEY=
 ```
 
 ---
@@ -112,6 +124,7 @@ DATABASE_URL=
 #### [NEW] `lib/db.ts` & `lib/schema.ts`
 Drizzle ORM setup connecting to Neon DB via HTTP driver.
 Schema defines tables for `users` (synced from Clerk), `reading_progress`, `highlights`, and `bookmarks`.
+The `users` table will include a `github_installation_id` column to store the user's GitHub App installation ID.
 
 #### [NEW] `app/api/webhooks/clerk/route.ts`
 Next.js API route that listens for Clerk webhooks (`user.created`, `user.updated`).
@@ -119,7 +132,18 @@ Verifies payload using Svix and `CLERK_WEBHOOK_SECRET`.
 Upserts user data into Neon DB using Drizzle ORM.
 
 #### [NEW] `middleware.ts`
-Clerk middleware to protect `/library` and `/read` routes, while allowing public access to the webhook endpoint.
+Clerk middleware to protect `/library` and `/read` routes, while allowing public access to the webhook endpoint and GitHub setup redirect endpoint.
+
+---
+
+### 2.5. GitHub App Setup Flow
+
+#### [NEW] `app/api/github/setup/route.ts`
+Next.js API route that handles the redirect back from the GitHub App installation flow.
+It will capture the `installation_id` from the URL, verify the authenticated Clerk user, and update their `users` record in Neon DB with this ID.
+
+#### [NEW] `app/setup/page.tsx`
+A setup page for users who have logged in via Clerk but haven't installed the GitHub App yet. It displays a clear call-to-action explaining why the app needs repository access and provides a button linking to `https://github.com/apps/{app-name}/installations/new`.
 
 ---
 
@@ -157,6 +181,7 @@ readingProgress: '++id, fileId, scrollPercent, lastReadAt'
 highlights: '++id, fileId, startOffset, endOffset, color, text, createdAt'
 bookmarks: '++id, fileId, scrollPercent, label, createdAt'
 recentlyRead: '++id, fileId, repoFullName, filePath, lastReadAt'
+likedFiles: '++id, fileId, repoFullName, filePath, likedAt'
 settings: 'key, value'  // theme, fontSize, fontFamily, autoScrollSpeed
 ```
 
@@ -167,18 +192,20 @@ React hooks wrapping Dexie for reactive data:
 - `useBookmarks(fileId)` — CRUD bookmarks
 - `useSettings()` — get/set reader preferences
 - `useRecentlyRead()` — reading history
+- `useLikedFiles()` — favorited documents
 
 ---
 
 ### 5. GitHub Integration
 
 #### [NEW] `lib/github.ts`
-GitHub API service using Octokit:
-- `getUserRepos(token, page)` — list user's repos (paginated)
-- `searchRepos(token, query)` — search GitHub repos
-- `getRepoTree(token, owner, repo)` — get full file tree, filter `.md` files
-- `getFileContent(token, owner, repo, path)` — fetch raw markdown content
-- `getUserProfile(token)` — get user avatar, name, bio
+GitHub API service using `@octokit/rest` and `@octokit/auth-app`:
+- Generates Installation Access Tokens using the GitHub App's private key and the user's `github_installation_id` from the database.
+- `getUserRepos(installationId, page)` — list repos the app has been granted access to.
+- `searchRepos(installationId, query)` — search within installed repos.
+- `getRepoTree(installationId, owner, repo)` — get full file tree, filter `.md` files.
+- `getFileContent(installationId, owner, repo, path)` — fetch raw markdown content.
+- Everything runs server-side via Next.js Server Actions or API Routes so the private key never reaches the client.
 
 #### [NEW] `lib/github-cache.ts`
 Caching layer on top of GitHub API:
@@ -240,8 +267,8 @@ Root layout:
 #### [NEW] `app/library/page.tsx` — Library Dashboard
 **Sections:**
 1. **Continue Reading** — Last opened documents with progress bars
-2. **Recently Added** — Documents opened in the last 7 days
-3. **All Repos** — Grid of user's GitHub repos (only those containing .md files)
+2. **Liked** — User's favorited/liked markdown documents for quick access
+3. **My Repos** — Grid of user's GitHub repos (only those containing .md files)
 
 **Features:**
 - Search bar to search repos or filter by name
@@ -383,13 +410,16 @@ zealous-tesla/
 ├── app/
 │   ├── layout.tsx                          # Root layout + fonts + theme
 │   ├── page.tsx                            # Landing / login
+│   ├── setup/page.tsx                      # GitHub App installation prompt
 │   ├── globals.css                         # Design system + themes
 │   ├── manifest.ts                         # PWA manifest
 │   ├── sw.ts                               # Service worker
 │   ├── ~offline/
 │   │   └── page.tsx                        # Offline fallback
 │   ├── api/
-│   │   └── auth/[...nextauth]/route.ts     # Auth.js handlers
+│   │   ├── auth/[...nextauth]/route.ts     # Auth.js handlers
+│   │   ├── github/setup/route.ts           # GitHub App installation callback
+│   │   └── webhooks/clerk/route.ts         # Clerk webhooks
 │   ├── library/
 │   │   ├── page.tsx                        # Library dashboard
 │   │   └── [owner]/[repo]/

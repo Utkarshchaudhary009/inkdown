@@ -10,13 +10,14 @@ interface HighlightSelectionProps {
 
 // Fallback types for CSS Custom Highlight API
 declare global {
-  interface Window {
-    CSS: {
-      highlights?: {
-        clear: () => void;
-        set: (name: string, highlight: unknown) => void;
-      };
+  interface CSS {
+    highlights?: {
+      clear: () => void;
+      set: (name: string, highlight: Highlight) => void;
     };
+  }
+  interface Window {
+    CSS: CSS;
   }
 }
 
@@ -35,34 +36,33 @@ export function HighlightManager({ fileId, containerRef }: HighlightSelectionPro
     return { start, end: start + range.toString().length };
   };
 
-  // Helper to deserialize offsets back to a Range
+  // Helper to deserialize offsets back to a Range using TreeWalker
   const deserializeRange = (start: number, end: number, container: HTMLElement): Range | null => {
     let charCount = 0;
     const range = document.createRange();
     let startSet = false;
     let endSet = false;
 
-    const traverseNodes = (node: Node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const nextCharCount = charCount + (node.textContent?.length || 0);
-        if (!startSet && start >= charCount && start <= nextCharCount) {
-          range.setStart(node, start - charCount);
-          startSet = true;
-        }
-        if (!endSet && end >= charCount && end <= nextCharCount) {
-          range.setEnd(node, end - charCount);
-          endSet = true;
-        }
-        charCount = nextCharCount;
-      } else {
-        for (let i = 0; i < node.childNodes.length; i++) {
-          traverseNodes(node.childNodes[i]);
-          if (startSet && endSet) break;
-        }
-      }
-    };
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+    let node = walker.nextNode();
 
-    traverseNodes(container);
+    while (node && (!startSet || !endSet)) {
+      const nextCharCount = charCount + (node.textContent?.length || 0);
+      
+      if (!startSet && start >= charCount && start <= nextCharCount) {
+        range.setStart(node, start - charCount);
+        startSet = true;
+      }
+      
+      if (!endSet && end >= charCount && end <= nextCharCount) {
+        range.setEnd(node, end - charCount);
+        endSet = true;
+      }
+      
+      charCount = nextCharCount;
+      node = walker.nextNode();
+    }
+
     return startSet && endSet ? range : null;
   };
 
