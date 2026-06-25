@@ -154,6 +154,7 @@ export function SearchOverlay({ containerSelector = '.markdown-container' }: Sea
         ref={inputRef}
         type="text"
         placeholder="Find in page..."
+        aria-label="Find in page"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => {
@@ -170,13 +171,13 @@ export function SearchOverlay({ containerSelector = '.markdown-container' }: Sea
         </span>
       )}
       <div className="flex items-center gap-1 border-l border-border pl-2 shrink-0">
-        <button onClick={handlePrev} disabled={matchCount === 0} className="p-1.5 rounded-full text-muted-foreground hover:bg-secondary disabled:opacity-50 transition-colors">
+        <button onClick={handlePrev} disabled={matchCount === 0} aria-label="Previous match" title="Previous match" className="p-1.5 rounded-full text-muted-foreground hover:bg-secondary disabled:opacity-50 transition-colors">
           <ChevronUp className="h-4 w-4" />
         </button>
-        <button onClick={handleNext} disabled={matchCount === 0} className="p-1.5 rounded-full text-muted-foreground hover:bg-secondary disabled:opacity-50 transition-colors">
+        <button onClick={handleNext} disabled={matchCount === 0} aria-label="Next match" title="Next match" className="p-1.5 rounded-full text-muted-foreground hover:bg-secondary disabled:opacity-50 transition-colors">
           <ChevronDown className="h-4 w-4" />
         </button>
-        <button onClick={() => { setIsOpen(false); clearHighlights(); }} className="p-1.5 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive ml-1 transition-colors">
+        <button onClick={() => { setIsOpen(false); clearHighlights(); }} aria-label="Close search" title="Close search" className="p-1.5 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive ml-1 transition-colors">
           <X className="h-4 w-4" />
         </button>
       </div>
