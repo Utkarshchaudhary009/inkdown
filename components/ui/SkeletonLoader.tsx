@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function RepoCardSkeleton() {
   return (
     <div className="flex flex-col gap-3 p-5 rounded-2xl border border-border bg-card animate-pulse">
