@@ -17,7 +17,7 @@
 | 3 | Lordicon Integration | Setup Lordicon script/component with strict hydration validation and active reading theme styling integration | None | PLANNED |
 | 4 | Shadcn Toaster Integration | Set up Shadcn Toaster inside `layout.tsx` and refactor existing toast notifications | None | PLANNED |
 | 5 | Micro-Animations & UX Polish | Add page transitions, card hover effects, sidebar slide-ins, and skeleton loaders | None | PLANNED |
-| 6 | E2E Verification & PR Workflow | Create PR on `feature/pwa-offline`, wait 10 min for review, apply feedback, merge to master, verify Vercel build | M1, M2, M3, M4, M5 | PLANNED |
+| 6 | E2E Verification & PR Workflow | Create PR on `feature/pwa-offline`, wait 10 min for review, apply feedback, merge to main, verify Vercel build | M1, M2, M3, M4, M5 | PLANNED |
 
 ## Interface Contracts
 ### Service Worker ↔ Next.js Build

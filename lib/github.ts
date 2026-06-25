@@ -6,6 +6,7 @@ import { createAppAuth } from '@octokit/auth-app';
 import { db } from '@/lib/db';
 import { users } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
+import { type Repo } from '@/components/repo-card';
 
 export async function getOctokit() {
   const { userId } = await auth();
@@ -41,13 +42,13 @@ export async function getOctokit() {
   });
 }
 
-export async function getUserRepos() {
+export async function getUserRepos(): Promise<Repo[]> {
   const octokit = await getOctokit();
   const { data } = await octokit.repos.listForAuthenticatedUser({
     sort: 'updated',
     per_page: 100,
   });
-  return data;
+  return data as unknown as Repo[];
 }
 
 export async function getRepoTree(owner: string, repo: string) {

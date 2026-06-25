@@ -85,7 +85,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
           setIsOffline(true);
           const cached = await db.cachedFiles.where('fileId').equals(fileId).first();
           if (cached) {
-            if (!content) setContent(cached.content);
+            setContent(prev => prev || cached.content);
             addRecentlyRead(fileId, `${owner}/${repo}`, filePath);
           } else {
             setError("Failed to load file content and no offline cache is available.");
@@ -97,8 +97,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
     
     loadContent();
     return () => { isMounted = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileId, owner, repo, filePath]);
+  }, [fileId, owner, repo, filePath, addRecentlyRead]);
 
   if (isLoading) {
     return (

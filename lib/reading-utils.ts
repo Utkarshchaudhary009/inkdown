@@ -9,7 +9,7 @@ function getWorker() {
     // Return a dummy implementation for SSR
     return {
       extractText: async (text: string) => text,
-      calculateReadingTime: async (_text: string) => 0
+      calculateReadingTime: async () => 0
     };
   }
 

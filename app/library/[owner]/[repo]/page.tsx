@@ -80,7 +80,7 @@ export default function RepoPage({
             <p className="text-muted-foreground col-span-2">No files from this repository are cached offline.</p>
           ) : (
             offlineFiles.map((file) => (
-              <Link key={file.filePath} href={`/read/${owner}/${repo}/${file.filePath}`}>
+              <Link key={file.filePath} href={`/read/${owner}/${repo}/${file.filePath.split('/').map(encodeURIComponent).join('/')}`}>
                 <Card className="hover:bg-muted/50 transition-colors border-amber-500/30">
                   <CardHeader>
                     <CardTitle className="text-base break-all">{file.filePath}</CardTitle>

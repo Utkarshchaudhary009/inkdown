@@ -14,7 +14,7 @@ export function ProgressBar({ fileId }: ProgressBarProps) {
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (savedProgress?.scrollPercent && barRef.current && !barRef.current.style.width) {
+    if (savedProgress?.scrollPercent && barRef.current && (!barRef.current.style.width || barRef.current.style.width === '0%')) {
       barRef.current.style.width = `${savedProgress.scrollPercent}%`;
     }
   }, [savedProgress]);

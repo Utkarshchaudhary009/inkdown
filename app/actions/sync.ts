@@ -7,6 +7,9 @@ import { eq, and } from 'drizzle-orm';
 
 function parseFileId(fileId: string) {
   const parts = fileId.split('/');
+  if (parts.length < 3) {
+    throw new Error('Invalid fileId format');
+  }
   const repoFullName = `${parts[0]}/${parts[1]}`;
   const filePath = parts.slice(2).join('/');
   return { repoFullName, filePath };

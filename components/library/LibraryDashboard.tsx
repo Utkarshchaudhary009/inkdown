@@ -54,7 +54,7 @@ interface LikedFileProps {
 
 function LikedFileCard({ repoFullName, filePath, likedAt }: LikedFileProps) {
   return (
-    <Link href={`/read/${repoFullName}/${filePath}`} className="group flex flex-col gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-secondary/50 transition-all hover:shadow-md">
+    <Link href={`/read/${repoFullName}/${filePath.split('/').map(encodeURIComponent).join('/')}`} className="group flex flex-col gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-secondary/50 transition-all hover:shadow-md">
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-col min-w-0">
           <h3 className="font-semibold text-foreground truncate">{filePath.split('/').pop()}</h3>
@@ -85,7 +85,7 @@ export function LibraryDashboard() {
         setAppInstalled(status.isInstalled);
         
         if (status.isInstalled) {
-          const fetched = await getUserRepos() as unknown as Repo[];
+          const fetched = await getUserRepos();
           setRepos(fetched);
         }
       } catch (error) {
@@ -193,7 +193,7 @@ export function LibraryDashboard() {
               </div>
             ))}
           </div>
-        ) : filteredRepos.length === 0 ? (
+        ) : appInstalled && filteredRepos.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground bg-card/50 rounded-2xl border border-border border-dashed">
             <FolderGit2 className="h-10 w-10 mx-auto opacity-20 mb-3" />
             <p>No repositories found matching your search.</p>
