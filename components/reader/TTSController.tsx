@@ -157,19 +157,19 @@ export function TTSController({ content }: TTSControllerProps) {
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Volume2 className="h-4 w-4" /> Text to Speech
           </h3>
-          <button onClick={() => { setIsOpen(false); stop(); }} className="text-muted-foreground hover:text-foreground">
+          <button aria-label="Close Text to Speech" onClick={() => { setIsOpen(false); stop(); }} className="text-muted-foreground hover:text-foreground">
             <Square className="h-4 w-4" />
           </button>
         </div>
         
         <div className="flex items-center justify-center gap-4 py-2">
-          <button onClick={togglePlay} className="p-3 bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90 transition-transform active:scale-95">
+          <button aria-label={isPlaying && !isPaused ? "Pause" : "Play"} onClick={togglePlay} className="p-3 bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90 transition-transform active:scale-95">
             {isPlaying && !isPaused ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
           </button>
-          <button onClick={stop} className="p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
+          <button aria-label="Stop" onClick={stop} className="p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
             <Square className="h-5 w-5" />
           </button>
-          <button onClick={skipForward} className="p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
+          <button aria-label="Skip forward" onClick={skipForward} className="p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
             <SkipForward className="h-5 w-5" />
           </button>
         </div>
