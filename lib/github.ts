@@ -47,11 +47,10 @@ export async function getOctokit() {
 
 export async function getUserRepos(): Promise<Repo[]> {
   const octokit = await getOctokit();
-  const { data } = await octokit.repos.listForAuthenticatedUser({
-    sort: 'updated',
+  const { data } = await octokit.apps.listReposAccessibleToInstallation({
     per_page: 100,
   });
-  return data as unknown as Repo[];
+  return data.repositories as unknown as Repo[];
 }
 
 export async function getRepoTree(owner: string, repo: string) {
