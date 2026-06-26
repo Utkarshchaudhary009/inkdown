@@ -5,7 +5,7 @@ import { RepoCard, type Repo } from "@/components/repo-card";
 import { useRecentlyRead, useReadingProgress, useLikedFiles } from '@/lib/db-hooks';
 import Link from 'next/link';
 import { Clock, FolderGit2, Search, LayoutGrid, List, Heart } from 'lucide-react';
-import { getUserRepos } from '@/lib/github';
+import { getInstallationRepos } from '@/lib/github';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getUserInstallationStatus } from '@/app/actions/user';
 
@@ -85,7 +85,7 @@ export function LibraryDashboard() {
         setAppInstalled(status.isInstalled);
         
         if (status.isInstalled) {
-          const fetched = await getUserRepos();
+          const fetched = await getInstallationRepos();
           setRepos(fetched);
         }
       } catch (error) {
