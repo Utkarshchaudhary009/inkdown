@@ -45,13 +45,27 @@ export async function getOctokit() {
   });
 }
 
-export async function getUserRepos(): Promise<Repo[]> {
+const PAGE_SIZE = 100;
+
+interface OctokitListReposResponse {
+  data: {
+    repositories: unknown[];
+  };
+}
+
+export async function getInstallationRepos(): Promise<Repo[]> {
   const octokit = await getOctokit();
-  const { data } = await octokit.repos.listForAuthenticatedUser({
-    sort: 'updated',
-    per_page: 100,
+  const repositories = await octokit.paginate(
+    octokit.apps.listReposAccessibleToInstallation,
+    { per_page: PAGE_SIZE },
+    (response: unknown) => (response as OctokitListReposResponse).data.repositories
+  );
+
+  return (repositories as unknown as Repo[]).sort((a, b) => {
+    const timeA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+    const timeB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+    return timeB - timeA;
   });
-  return data as unknown as Repo[];
 }
 
 export async function getRepoTree(owner: string, repo: string) {
