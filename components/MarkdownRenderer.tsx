@@ -7,6 +7,18 @@ import { Virtuoso } from "react-virtuoso";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 
+// Security helper to validate URLs and prevent XSS (e.g., javascript: URIs)
+function isSafeUrl(url: string | undefined): boolean {
+  if (!url) return true; // Empty URLs are safe
+  try {
+    // Use a dummy base to handle relative URLs
+    const parsed = new URL(url, 'http://example.com');
+    return ['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol);
+  } catch {
+    return false; // If parsing fails, consider it unsafe
+  }
+}
+
 // Utility to extract raw text from React children to generate heading IDs
 function extractText(node: React.ReactNode): string {
   if (typeof node === "string") return node;
@@ -191,8 +203,9 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 return <p className={cn("leading-7 [&:not(:first-child)]:mt-6", className)} {...props}>{children}</p>;
               },
               a: (componentProps: StreamdownComponentProps & React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-                const { className, children, ...props } = omitNode(componentProps);
-                return <a className={cn("font-medium text-primary underline underline-offset-4", className)} {...props}>{children}</a>;
+                const { className, children, href, ...props } = omitNode(componentProps);
+                const safeHref = isSafeUrl(href) ? href : '#';
+                return <a href={safeHref} className={cn("font-medium text-primary underline underline-offset-4", className)} {...props}>{children}</a>;
               },
               ul: (componentProps: StreamdownComponentProps) => {
                 const { className, children, ...props } = omitNode(componentProps);
