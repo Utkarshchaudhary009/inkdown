@@ -1,0 +1,3 @@
+## 2024-06-26 - Extracted Virtualized List Render Props
+**Learning:** In React apps using virtualized lists (like `react-virtuoso`), passing inline components or objects to `itemContent` props forces all rendered list items to needlessly re-render on parent renders because the prop object reference changes every time.
+**Action:** Always extract configuration objects (like `components` for markdown renderers) out of the component scope to make them static, and memoize list item render functions (e.g. `useCallback` for `Virtuoso`'s `itemContent`). Apply `React.memo(function MyComponent() {...})` to inner components to prevent unnecessary re-renders when their props haven't changed, while ensuring they have explicit display names to appease ESLint.
