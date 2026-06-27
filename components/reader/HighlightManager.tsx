@@ -166,10 +166,10 @@ export function HighlightManager({ fileId, containerRef }: HighlightSelectionPro
         transform: 'translateX(-50%)' 
       }}
     >
-      <button onClick={() => handleAddHighlight('yellow')} className="w-6 h-6 rounded-full bg-yellow-300 hover:scale-110 transition-transform" />
-      <button onClick={() => handleAddHighlight('green')} className="w-6 h-6 rounded-full bg-green-300 hover:scale-110 transition-transform" />
-      <button onClick={() => handleAddHighlight('blue')} className="w-6 h-6 rounded-full bg-blue-300 hover:scale-110 transition-transform" />
-      <button onClick={() => handleAddHighlight('red')} className="w-6 h-6 rounded-full bg-red-300 hover:scale-110 transition-transform" />
+      <button aria-label="Highlight in yellow" onClick={() => handleAddHighlight('yellow')} className="w-6 h-6 rounded-full bg-yellow-300 hover:scale-110 transition-transform" />
+      <button aria-label="Highlight in green" onClick={() => handleAddHighlight('green')} className="w-6 h-6 rounded-full bg-green-300 hover:scale-110 transition-transform" />
+      <button aria-label="Highlight in blue" onClick={() => handleAddHighlight('blue')} className="w-6 h-6 rounded-full bg-blue-300 hover:scale-110 transition-transform" />
+      <button aria-label="Highlight in red" onClick={() => handleAddHighlight('red')} className="w-6 h-6 rounded-full bg-red-300 hover:scale-110 transition-transform" />
     </div>
   );
 }
