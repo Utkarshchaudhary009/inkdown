@@ -1,0 +1,3 @@
+## 2026-06-28 - Markdown Renderer Virtualization Thrashing
+**Learning:** Defining the `components` object inline for `react-virtuoso` itemContent (or other virtualized lists) causes the components to be recreated on every single render. This forces React to unmount and remount every DOM node inside the markdown block on scroll, destroying performance.
+**Action:** Always extract markdown component override objects (`components={{ h1: ... }}`) to a stable constant outside the component when passing them to virtualized list items or frequently rendering components. Memoize individual heavy renderers (like `HeadingRenderer` which extracts text) with `React.memo`.
