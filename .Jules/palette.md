@@ -1,0 +1,3 @@
+## 2026-06-28 - Missing ARIA Labels on Icon-only Reader Controls
+**Learning:** Discovered a recurring accessibility gap where custom reader controls (e.g., highlight color selection buttons, auto-scroll playback, TTS controls) lack both accessible names (`aria-label`) and visible keyboard focus states, making them invisible to screen readers and difficult to use via keyboard navigation.
+**Action:** Add `role`, `aria-label`, `title`, and explicit `focus-visible:ring` Tailwind classes to these custom interactive elements to ensure they meet basic accessibility standards while maintaining the existing visual design.
