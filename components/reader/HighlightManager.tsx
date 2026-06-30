@@ -166,10 +166,10 @@ export function HighlightManager({ fileId, containerRef }: HighlightSelectionPro
         transform: 'translateX(-50%)' 
       }}
     >
-      <button onClick={() => handleAddHighlight('yellow')} className="w-6 h-6 rounded-full bg-yellow-300 hover:scale-110 transition-transform" />
-      <button onClick={() => handleAddHighlight('green')} className="w-6 h-6 rounded-full bg-green-300 hover:scale-110 transition-transform" />
-      <button onClick={() => handleAddHighlight('blue')} className="w-6 h-6 rounded-full bg-blue-300 hover:scale-110 transition-transform" />
-      <button onClick={() => handleAddHighlight('red')} className="w-6 h-6 rounded-full bg-red-300 hover:scale-110 transition-transform" />
+      <button onClick={() => handleAddHighlight('yellow')} aria-label="Highlight yellow" title="Highlight yellow" className="w-6 h-6 rounded-full bg-yellow-300 hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-popover" />
+      <button onClick={() => handleAddHighlight('green')} aria-label="Highlight green" title="Highlight green" className="w-6 h-6 rounded-full bg-green-300 hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-popover" />
+      <button onClick={() => handleAddHighlight('blue')} aria-label="Highlight blue" title="Highlight blue" className="w-6 h-6 rounded-full bg-blue-300 hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-popover" />
+      <button onClick={() => handleAddHighlight('red')} aria-label="Highlight red" title="Highlight red" className="w-6 h-6 rounded-full bg-red-300 hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-popover" />
     </div>
   );
 }
