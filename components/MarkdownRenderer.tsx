@@ -24,6 +24,22 @@ function generateId(text: string): string {
   return text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
 }
 
+function sanitizeUrl(url?: string, allowData: boolean = false): string | undefined {
+  if (!url) return url;
+  try {
+    const parsed = new URL(url, 'http://dummy.com');
+    const blockedProtocols = ['javascript:', 'vbscript:'];
+    if (!allowData) blockedProtocols.push('data:');
+
+    if (blockedProtocols.includes(parsed.protocol)) {
+      return '#';
+    }
+    return url;
+  } catch (e) {
+    return '#';
+  }
+}
+
 interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
   level: 1 | 2 | 3 | 4 | 5 | 6;
 }
@@ -57,7 +73,7 @@ const ImageRenderer = ({ src, alt, className, ...props }: React.ImgHTMLAttribute
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img 
-      src={src} 
+      src={typeof src === 'string' ? sanitizeUrl(src, true) : src}
       alt={alt || "Markdown image"} 
       className={cn("max-w-full h-auto rounded-md shadow-sm my-6", className)} 
       loading="lazy" 
@@ -191,8 +207,8 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 return <p className={cn("leading-7 [&:not(:first-child)]:mt-6", className)} {...props}>{children}</p>;
               },
               a: (componentProps: StreamdownComponentProps & React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-                const { className, children, ...props } = omitNode(componentProps);
-                return <a className={cn("font-medium text-primary underline underline-offset-4", className)} {...props}>{children}</a>;
+                const { className, children, href, ...props } = omitNode(componentProps);
+                return <a href={sanitizeUrl(href)} className={cn("font-medium text-primary underline underline-offset-4", className)} {...props}>{children}</a>;
               },
               ul: (componentProps: StreamdownComponentProps) => {
                 const { className, children, ...props } = omitNode(componentProps);
