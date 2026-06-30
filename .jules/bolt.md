@@ -1,0 +1,3 @@
+## 2024-05-14 - Stable Component Identities in Virtualized Lists
+**Learning:** In React, passing inline objects mapping component types to component functions (like `components={{ h1: () => ... }}`) to children components inside a virtualized list like `react-virtuoso` causes catastrophic re-renders. Every new item layout creation creates a brand-new component reference, triggering full DOM remounting of complex nodes like markdown instead of reusing them.
+**Action:** Always extract static mapping objects for component renderers outside the component render function module scope when they don't depend on closure variables.
