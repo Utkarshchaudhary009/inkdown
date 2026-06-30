@@ -142,8 +142,9 @@ export function TTSController({ content }: TTSControllerProps) {
     return (
       <button 
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-40 p-3 bg-card border border-border shadow-lg rounded-full text-muted-foreground hover:text-foreground transition-colors animate-in fade-in"
+        className="fixed bottom-4 right-4 z-40 p-3 bg-card border border-border shadow-lg rounded-full text-muted-foreground hover:text-foreground transition-colors animate-in fade-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         aria-label="Open Text to Speech"
+        title="Open Text to Speech"
       >
         <Volume2 className="h-5 w-5" />
       </button>
@@ -157,19 +158,19 @@ export function TTSController({ content }: TTSControllerProps) {
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Volume2 className="h-4 w-4" /> Text to Speech
           </h3>
-          <button onClick={() => { setIsOpen(false); stop(); }} className="text-muted-foreground hover:text-foreground">
+          <button onClick={() => { setIsOpen(false); stop(); }} aria-label="Close Text to Speech" title="Close Text to Speech" className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm">
             <Square className="h-4 w-4" />
           </button>
         </div>
         
         <div className="flex items-center justify-center gap-4 py-2">
-          <button onClick={togglePlay} className="p-3 bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90 transition-transform active:scale-95">
+          <button onClick={togglePlay} aria-label={isPlaying && !isPaused ? "Pause" : "Play"} title={isPlaying && !isPaused ? "Pause" : "Play"} className="p-3 bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90 transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
             {isPlaying && !isPaused ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
           </button>
-          <button onClick={stop} className="p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
+          <button onClick={stop} aria-label="Stop" title="Stop" className="p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
             <Square className="h-5 w-5" />
           </button>
-          <button onClick={skipForward} className="p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
+          <button onClick={skipForward} aria-label="Skip forward" title="Skip forward" className="p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
             <SkipForward className="h-5 w-5" />
           </button>
         </div>
