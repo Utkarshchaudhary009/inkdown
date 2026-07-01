@@ -170,9 +170,7 @@ export function LibraryDashboard() {
             </p>
           </div>
           <a 
-            href={process.env.NEXT_PUBLIC_GITHUB_APP_NAME ? `https://github.com/apps/${process.env.NEXT_PUBLIC_GITHUB_APP_NAME}/installations/new` : '#'}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/api/github/install"
             className="shrink-0 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Install App

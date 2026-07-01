@@ -1,0 +1,4 @@
+## 2025-07-01 - [Implement CSRF protection for GitHub App installation]
+ **Vulnerability:** [The GitHub App OAuth flow in `app/api/github/setup/route.ts` lacked `state` parameter validation for the `installation_id` GET parameter, leaving it vulnerable to CSRF and potentially IDOR.]
+ **Learning:** [GitHub App setup URLs do not automatically enforce state parameter usage out of the box because it's considered an installation setup flow rather than standard OAuth authorization. To enforce state, we must initiate the flow ourselves, generate/store the state locally (e.g. via an HttpOnly cookie), append it to the installation link as a query string, and validate it in the setup callback.]
+ **Prevention:** [When integrating external services with setup callbacks, especially those mapping third-party identities or installations to local users, always implement a state-validation mechanism using secure cookies to verify the request originated from the intended user.]

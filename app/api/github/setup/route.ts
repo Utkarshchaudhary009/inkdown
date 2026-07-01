@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export async function GET(req: Request) {
   const { userId } = await auth();
@@ -13,6 +14,21 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const installationId = url.searchParams.get('installation_id');
+  const state = url.searchParams.get('state');
+
+  // Verify state parameter to prevent CSRF
+  const cookieStore = await cookies();
+  const savedState = cookieStore.get('github_setup_state')?.value;
+
+  if (!state || !savedState || state !== savedState) {
+    return NextResponse.json(
+      { error: 'Invalid state parameter' },
+      { status: 403 }
+    );
+  }
+
+  // Clear the state cookie after successful validation
+  cookieStore.delete('github_setup_state');
 
   if (installationId) {
     try {
