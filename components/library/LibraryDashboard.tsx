@@ -112,6 +112,7 @@ export function LibraryDashboard() {
           <input 
             type="text" 
             placeholder="Search repositories..."
+            aria-label="Search repositories"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="pl-9 pr-4 py-2 bg-card border border-border rounded-full text-sm outline-none focus:ring-2 focus:ring-primary w-full sm:w-64 transition-all"
@@ -119,13 +120,17 @@ export function LibraryDashboard() {
           <div className="flex items-center border border-border rounded-full p-1 bg-card">
             <button 
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-full transition-colors ${viewMode === 'grid' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              aria-label="Grid view"
+              title="Grid view"
+              className={`p-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${viewMode === 'grid' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
             <button 
               onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-full transition-colors ${viewMode === 'list' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              aria-label="List view"
+              title="List view"
+              className={`p-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${viewMode === 'list' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <List className="h-4 w-4" />
             </button>
